@@ -11,12 +11,20 @@ import sys
 import time
 import traceback
 import socket
+import socketserver
 import urllib.error
 import urllib.request
 from datetime import datetime
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+
+try:
+    from http.server import ThreadingHTTPServer
+except ImportError:
+    class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+        daemon_threads = True
 
 try:
     import pdfplumber
