@@ -1,0 +1,7 @@
+.git
+.DS_Store
+__pycache__/
+*.pyc
+ai_intake_app/__pycache__/
+ai_intake_app/data/
+.playwright-cli/

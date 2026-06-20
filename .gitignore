@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+.env
+ai_intake_app/data/
+/data/
+*.sqlite3
+model_settings.json

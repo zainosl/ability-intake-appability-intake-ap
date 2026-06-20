@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <script>
+      if (window.location.protocol === "file:") {
+        window.location.replace("http://127.0.0.1:8787/");
+      }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>能力资产诊断 · AI 前置采集</title>
+    <link rel="stylesheet" href="/static/styles.css?v=20260620ae" />
+    <link rel="stylesheet" href="styles.css?v=20260620ae" />
+  </head>
+  <body>
+    <div class="admin-gate" id="adminGate" hidden>
+      <form class="admin-gate-card" id="adminLoginForm">
+        <div class="mark">A</div>
+        <h2>顾问台访问口令</h2>
+        <p>这是顾问后台，包含客户材料和访谈记录。请输入访问口令后继续。</p>
+        <input name="password" type="password" placeholder="输入访问口令" autocomplete="current-password" />
+        <button class="primary full" type="submit">进入顾问台</button>
+        <span id="adminGateMessage"></span>
+      </form>
+    </div>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">A</div>
+        <div>
+          <h1>能力资产诊断</h1>
+          <p>AI 前置采集</p>
+        </div>
+      </div>
+
+      <button class="primary full" id="newSessionBtn">新建诊断</button>
+      <div class="session-list" id="sessionList"></div>
+    </aside>
+
+    <main class="workspace">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">第一步 · 上传材料</p>
+          <h2 id="pageTitle">能力资产与认知资产诊断</h2>
+        </div>
+        <div class="top-actions">
+          <div class="status" id="apiStatus">检查服务中...</div>
+          <form id="apiKeyForm" class="key-form">
+            <input name="model" type="text" value="gpt-5.5" placeholder="模型" />
+            <input name="base_url" type="url" value="https://api.openai.com/v1" placeholder="接口路由" />
+            <input name="api_key" type="password" placeholder="OpenAI API Key" autocomplete="off" />
+            <button type="submit">设置 Key</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel setup-panel">
+          <div class="panel-head">
+            <h3>1. 上传材料</h3>
+            <span id="sessionStatus">未开始</span>
+          </div>
+
+          <form id="sessionForm" class="stack">
+            <div class="step-note">
+              先创建一个诊断档案，再把客户材料按三种方式放进来：文件、链接、补充文本。
+            </div>
+            <label>
+              用户姓名
+              <input name="client_name" placeholder="例如：张三" required />
+            </label>
+            <label>
+              联系方式
+              <input name="contact" placeholder="微信/手机号/邮箱，可选" />
+            </label>
+            <label>
+              当前困惑
+              <textarea name="goal" rows="4" placeholder="他为什么来做这次诊断？想弄清什么？"></textarea>
+            </label>
+            <button class="primary" type="submit">创建诊断档案</button>
+          </form>
+          <div class="client-link-box">
+            <strong>用户自助访谈链接</strong>
+            <span>发给用户后，他可以自己打开页面回答 AI 追问。</span>
+            <div class="link-row">
+              <input id="clientLink" readonly placeholder="创建或选择档案后生成链接" />
+              <button id="copyClientLinkBtn" type="button">复制</button>
+              <button id="openClientLinkBtn" type="button">打开</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <form id="uploadForm" class="stack muted-block">
+            <h4>材料输入</h4>
+            <p>材料可以很散，先全部放进来。下一步 AI 会统一整理材料类型、项目线索、能力证据和追问缺口。</p>
+
+            <div class="input-card">
+              <div>
+                <strong>文件类型</strong>
+                <span>简历 PDF、Word、Markdown、项目复盘、SOP 等</span>
+              </div>
+              <input type="file" name="files" multiple />
+            </div>
+
+            <div class="input-card">
+              <div>
+                <strong>链接类型</strong>
+                <span>公众号文章、飞书知识库、作品链接、公开资料链接。一行一个链接。</span>
+              </div>
+              <textarea name="links" rows="5" placeholder="https://...\nhttps://..."></textarea>
+            </div>
+
+            <div class="input-card">
+              <div>
+                <strong>补充文本类型</strong>
+                <span>客户口述、成就故事、失败事件、他人反馈、学习输入、方法总结等</span>
+              </div>
+              <textarea name="notes" rows="8" placeholder="粘贴补充材料：成就故事、失败事件、他人反馈、学习输入、方法总结等"></textarea>
+            </div>
+            <button type="submit">保存材料</button>
+          </form>
+          <div class="save-feedback" id="saveFeedback"></div>
+          <div class="saved-materials">
+            <div class="saved-head">
+              <strong>已保存材料</strong>
+              <span id="savedCount">0 份</span>
+            </div>
+            <div class="file-list" id="fileList"></div>
+          </div>
+        </div>
+
+        <div class="panel chat-panel">
+          <div class="panel-head">
+            <h3>2. 整理与追问</h3>
+            <div class="actions">
+              <button id="organizeBtn">API整理材料（可选）</button>
+              <button id="askBtn">API生成下一问（可选）</button>
+              <button id="reportBtn">API真人审阅包（可选）</button>
+            </div>
+          </div>
+          <div class="method-strip">
+            <span>BEI/STAR</span>
+            <span>KSAO</span>
+            <span>三例证</span>
+            <span>SIGN</span>
+            <span>五桶归因</span>
+            <span>认知资产</span>
+          </div>
+          <div class="next-step" id="nextStep">
+            先在左侧上传材料。保存后，优先使用下方“网页版 AI 人工处理”完成深度整理。
+          </div>
+          <div class="progress-card" id="organizeProgress" hidden>
+            <div class="progress-head">
+              <strong id="progressTitle">正在整理材料</strong>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps">
+              <span id="progressStepLocal">本地清洗</span>
+              <span id="progressStepStruct">AI 材料规整</span>
+              <span id="progressStepAnalyze">AI 材料分析</span>
+              <span id="progressStepSave">保存结果</span>
+            </div>
+            <p id="progressDetail">准备开始。</p>
+          </div>
+          <div class="manual-ai">
+            <div class="manual-ai-head">
+              <div>
+                <strong>网页版 AI 人工处理</strong>
+                <span>生成完整输入包，复制到 GPT 网页版；再把返回 JSON 粘回来保存。</span>
+              </div>
+              <select id="manualTaskType">
+                <option value="material_structuring">1. 材料规整</option>
+                <option value="material_organization">2. 材料分析</option>
+              </select>
+            </div>
+            <div class="manual-ai-note" id="manualTaskHint">
+              第一步先生成“材料规整”输入包，网页版返回 JSON 后粘回来保存。
+            </div>
+            <div class="manual-flow">
+              <div class="manual-flow-step active" id="manualStepStruct">
+                <strong>1. 材料规整</strong>
+                <span>把散材料整理成事实底稿</span>
+              </div>
+              <div class="manual-flow-line"></div>
+              <div class="manual-flow-step" id="manualStepAnalyze">
+                <strong>2. 材料分析</strong>
+                <span>基于原始材料 + 规整底稿做判断</span>
+              </div>
+            </div>
+            <div class="manual-context" id="manualContext" hidden>
+              <div class="manual-context-head">
+                <strong>第二步将带入的第一步结果</strong>
+                <span id="manualContextMeta"></span>
+              </div>
+              <p id="manualContextOverview"></p>
+              <div class="manual-context-grid">
+                <div>
+                  <span>规整后材料</span>
+                  <strong id="manualContextMaterials">0</strong>
+                </div>
+                <div>
+                  <span>职业事实</span>
+                  <strong id="manualContextCareer">0</strong>
+                </div>
+                <div>
+                  <span>项目事实卡</span>
+                  <strong id="manualContextProjects">0</strong>
+                </div>
+                <div>
+                  <span>认知表达</span>
+                  <strong id="manualContextCognition">0</strong>
+                </div>
+              </div>
+            </div>
+            <div class="manual-ai-actions">
+              <button id="manualPromptBtn" type="button">生成网页版输入</button>
+              <button id="copyManualPromptBtn" type="button">复制输入</button>
+              <button id="importManualOutputBtn" type="button">保存网页版输出</button>
+            </div>
+            <div class="manual-save-status" id="manualSaveStatus"></div>
+            <label>
+              网页版输入
+              <textarea id="manualPromptBox" rows="8" readonly placeholder="点击“生成网页版输入”后，这里会出现完整输入包"></textarea>
+            </label>
+            <label>
+              网页版输出
+              <textarea id="manualOutputBox" rows="8" placeholder="把 GPT 网页版返回的完整 JSON 粘贴到这里"></textarea>
+            </label>
+          </div>
+          <div class="decision-panel" id="materialDecision" hidden>
+            <div class="decision-head">
+              <strong>材料就绪判断</strong>
+              <span id="decisionStatus">等待材料分析结果</span>
+            </div>
+            <p id="decisionReason"></p>
+            <div class="decision-grid">
+              <div>
+                <h4>如果先补材料</h4>
+                <div id="decisionMissing" class="json-card"></div>
+                <textarea id="decisionUserRequest" rows="5" readonly></textarea>
+                <button id="copyMaterialRequestBtn" type="button">复制补材料请求</button>
+              </div>
+              <div>
+                <h4>如果进入会前访谈</h4>
+                <div id="decisionInterviewQuestions" class="json-card"></div>
+                <div class="decision-actions">
+                  <button id="copyClientLinkFromDecisionBtn" type="button">复制用户访谈链接</button>
+                  <button id="openClientLinkFromDecisionBtn" type="button">打开用户访谈页</button>
+                </div>
+              </div>
+            </div>
+            <div class="decision-advisor" id="decisionAdvisor"></div>
+          </div>
+          <div class="chat" id="chat"></div>
+          <form id="messageForm" class="reply">
+            <textarea name="content" rows="4" placeholder="回答 AI 的追问，尽量讲具体事件、动作、结果和判断依据"></textarea>
+            <button class="primary" type="submit">提交回答</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel report-panel">
+        <div class="panel-head">
+          <h3>3. 顾问准备材料</h3>
+          <span>按标签切换材料线索与会前准备</span>
+        </div>
+        <div id="report" class="report empty">
+          还没有生成材料线索或会前准备。请先完成材料分析，再让用户完成 AI 会前访谈。
+        </div>
+      </section>
+    </main>
+
+    <dialog id="busyDialog">
+      <div class="loader"></div>
+      <p id="busyText">处理中...</p>
+    </dialog>
+
+    <script src="/static/app.js?v=20260620ae"></script>
+    <script>
+      if (!window.__abilityIntakeLoaded) {
+        const script = document.createElement("script");
+        script.src = "app.js?v=20260620ae";
+        document.body.appendChild(script);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,909 @@
+let currentSessionId = null;
+let currentSession = null;
+let aiBusy = false;
+let activeAdvisorReportTab = null;
+let progressTimers = [];
+window.__abilityIntakeLoaded = true;
+const API_BASE = window.location.protocol === "file:" ? "http://127.0.0.1:8787" : "";
+const ADMIN_TOKEN_KEY = "ability_intake_admin_token";
+const MANUAL_TASK_LABELS = {
+  material_structuring: "材料规整",
+  material_organization: "材料分析",
+};
+
+const MANUAL_TASK_HINTS = {
+  material_structuring: "第一步：生成材料规整输入包。网页版返回 JSON 后粘回保存，系统会保存为材料规整底稿。",
+  material_organization: "第二步：建议先保存材料规整结果，再生成材料分析输入包。保存后系统会进入 materials_organized 状态。",
+};
+
+const el = (id) => document.getElementById(id);
+
+function showBusy(text) {
+  el("busyText").textContent = text;
+  el("busyDialog").showModal();
+}
+
+function hideBusy() {
+  el("busyDialog").close();
+}
+
+function showFeedback(message, type = "info") {
+  const box = el("saveFeedback");
+  if (!box) return;
+  box.className = `save-feedback ${type}`;
+  box.textContent = message;
+}
+
+function setNextStep(message, type = "info") {
+  const box = el("nextStep");
+  if (!box) return;
+  box.className = `next-step ${type}`;
+  box.textContent = message;
+}
+
+function setManualSaveStatus(message, type = "info") {
+  const box = el("manualSaveStatus");
+  if (!box) return;
+  box.className = `manual-save-status ${type}`;
+  box.textContent = message || "";
+}
+
+function setAiBusy(isBusy) {
+  aiBusy = isBusy;
+  ["organizeBtn", "askBtn", "reportBtn"].forEach((id) => {
+    const button = el(id);
+    if (button) button.disabled = isBusy;
+  });
+}
+
+function resetProgress() {
+  progressTimers.forEach((timer) => clearTimeout(timer));
+  progressTimers = [];
+}
+
+function showOrganizeProgress() {
+  resetProgress();
+  const box = el("organizeProgress");
+  box.hidden = false;
+  box.className = "progress-card active";
+  setProgress(8, "正在做本地清洗", "本地程序正在过滤网页噪音、重复行和格式残留。", "progressStepLocal");
+  progressTimers.push(setTimeout(() => setProgress(28, "AI 正在规整材料", "第一轮模型调用：完整整理材料类型、事实、项目卡片和认知表达。", "progressStepStruct"), 900));
+  progressTimers.push(setTimeout(() => setProgress(58, "AI 正在分析材料", "第二轮模型调用：识别项目线索、能力证据、平台依赖和追问地图。", "progressStepAnalyze"), 4500));
+  progressTimers.push(setTimeout(() => setProgress(78, "正在等待模型返回", "深度整理会保留更多信息，材料较多时会多等一会儿。", "progressStepAnalyze"), 11000));
+}
+
+function setProgress(percent, title, detail, activeStepId) {
+  el("progressTitle").textContent = title;
+  el("progressPercent").textContent = `${percent}%`;
+  el("progressFill").style.width = `${percent}%`;
+  el("progressDetail").textContent = detail;
+  ["progressStepLocal", "progressStepStruct", "progressStepAnalyze", "progressStepSave"].forEach((id) => {
+    const step = el(id);
+    step.className = id === activeStepId ? "active" : "";
+  });
+}
+
+function completeOrganizeProgress() {
+  resetProgress();
+  setProgress(100, "材料整理完成", "已生成材料规整底稿、材料分析和材料就绪判断。", "progressStepSave");
+  el("organizeProgress").className = "progress-card done";
+}
+
+function failOrganizeProgress(message) {
+  resetProgress();
+  el("organizeProgress").hidden = false;
+  el("organizeProgress").className = "progress-card failed";
+  el("progressTitle").textContent = "材料整理失败";
+  el("progressPercent").textContent = "未完成";
+  el("progressDetail").textContent = message;
+}
+
+async function api(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+  if (token) headers.set("X-Admin-Token", token);
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 401 && data.auth_required) {
+      showAdminGate("顾问台已开启保护，请先输入访问口令。");
+    }
+    throw new Error(data.error || `请求失败：${res.status}`);
+  }
+  return data;
+}
+
+function showAdminGate(message = "") {
+  const gate = el("adminGate");
+  if (!gate) return;
+  gate.hidden = false;
+  el("adminGateMessage").textContent = message;
+}
+
+function hideAdminGate() {
+  const gate = el("adminGate");
+  if (!gate) return;
+  gate.hidden = true;
+  el("adminGateMessage").textContent = "";
+}
+
+async function loadAuthStatus() {
+  const data = await api("/api/auth/status");
+  if (data.enabled && !data.authenticated) {
+    showAdminGate("请输入顾问台访问口令。");
+    return false;
+  }
+  hideAdminGate();
+  return true;
+}
+
+async function loginAdmin(e) {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+  const password = formEl.elements.password.value.trim();
+  if (!password) {
+    el("adminGateMessage").textContent = "请输入访问口令。";
+    return;
+  }
+  try {
+    const data = await api("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    localStorage.setItem(ADMIN_TOKEN_KEY, data.token || "");
+    formEl.reset();
+    hideAdminGate();
+    await initAdvisorWorkspace();
+  } catch (err) {
+    el("adminGateMessage").textContent = err.message;
+  }
+}
+
+function formatDate(s) {
+  if (!s) return "";
+  return s.replace("T", " ").slice(0, 16);
+}
+
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+async function loadHealth() {
+  try {
+    const data = await api("/api/health");
+    el("apiStatus").textContent = data.has_api_key ? `模型：${data.model}` : "未设置模型 Key";
+    el("apiStatus").className = data.has_api_key ? "status ready" : "status warn";
+    const baseInput = el("apiKeyForm")?.elements.base_url;
+    if (baseInput && data.base_url) baseInput.value = data.base_url;
+  } catch (e) {
+    el("apiStatus").textContent = "服务异常";
+    el("apiStatus").className = "status error";
+  }
+}
+
+async function saveApiKey(e) {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+  const apiKey = formEl.elements.api_key.value.trim();
+  const model = formEl.elements.model.value.trim() || "gpt-5.5";
+  const baseUrl = formEl.elements.base_url.value.trim() || "https://api.openai.com/v1";
+  if (!apiKey) {
+    showFeedback("请先填写模型 API Key。", "error");
+    return;
+  }
+  showBusy("正在设置模型接口...");
+  try {
+    const data = await api("/api/settings/openai-key", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ api_key: apiKey, model, base_url: baseUrl }),
+    });
+    formEl.elements.api_key.value = "";
+    formEl.elements.model.value = data.model;
+    formEl.elements.base_url.value = data.base_url;
+    el("apiStatus").textContent = `模型：${data.model}`;
+    el("apiStatus").className = "status ready";
+    showFeedback("模型接口已设置到当前本地服务进程，可以继续点击“整理材料”或进入用户访谈页。", "success");
+    setNextStep("模型接口已就绪。若材料已整理，用户可以进入会前访谈页开始 AI 追问。", "success");
+  } catch (err) {
+    showFeedback(`设置模型接口失败：${err.message}`, "error");
+  } finally {
+    hideBusy();
+  }
+}
+
+async function loadSessions() {
+  const data = await api("/api/sessions");
+  const list = el("sessionList");
+  list.innerHTML = "";
+  data.sessions.forEach((s) => {
+    const card = document.createElement("div");
+    card.className = `session-card ${s.id === currentSessionId ? "active" : ""}`;
+    card.innerHTML = `
+      <strong>${escapeHtml(s.client_name)}</strong>
+      <span>${escapeHtml(s.status)} · ${formatDate(s.updated_at)}</span>
+    `;
+    card.addEventListener("click", () => selectSession(s.id));
+    list.appendChild(card);
+  });
+}
+
+async function selectSession(id) {
+  currentSessionId = id;
+  currentSession = await api(`/api/sessions/${id}`);
+  renderSession();
+  await loadSessions();
+}
+
+function renderSession() {
+  if (!currentSession) return;
+  const s = currentSession.session;
+  el("pageTitle").textContent = `${s.client_name} · 能力资产与认知资产诊断`;
+  el("sessionStatus").textContent = s.status;
+  renderClientLink(s.id);
+  renderFiles();
+  renderManualWorkflow();
+  renderChat();
+  renderReport();
+  renderMaterialDecision();
+  renderNextStep();
+}
+
+function renderClientLink(sessionId) {
+  const input = el("clientLink");
+  if (!input) return;
+  input.value = `${window.location.origin}/client?session=${sessionId}`;
+}
+
+function renderFiles() {
+  const list = el("fileList");
+  list.innerHTML = "";
+  const files = currentSession.files || [];
+  el("savedCount").textContent = `${files.length} 份`;
+  if (files.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty-list";
+    empty.textContent = "还没有保存材料。";
+    list.appendChild(empty);
+    return;
+  }
+  files.forEach((f) => {
+    const div = document.createElement("div");
+    div.className = "file-item";
+    div.innerHTML = `
+      <strong>${escapeHtml(f.original_name)}</strong>
+      <span>${f.text_len || 0} 字</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function renderNextStep() {
+  if (!currentSession) {
+    setNextStep("先创建诊断档案，再上传材料。", "info");
+    return;
+  }
+  const files = currentSession.files || [];
+  const materialOrg = getFreshMaterialOrganizationReport();
+  const hasMaterialOrg = Boolean(materialOrg);
+  const readiness = materialOrg?.content_json?.readiness_assessment;
+  const hasMessages = (currentSession.conversation || []).length > 0;
+  if (files.length === 0) {
+    setNextStep("第一步：在左侧上传文件、链接或补充文本，然后点击“保存材料”。", "info");
+  } else if (!hasMaterialOrg) {
+    setNextStep(`已保存 ${files.length} 份材料。下一步：在“网页版 AI 人工处理”里先生成“材料规整”输入，去 GPT 网页版处理后粘回输出；再做“材料分析”。`, "success");
+  } else if (readiness?.status === "must_collect_more_materials") {
+    setNextStep(`材料整理完成，但当前不建议进入会前访谈。建议先让用户补充材料：${readiness.missing_materials?.join("、") || readiness.reason}`, "error");
+  } else if (readiness?.status === "suggest_more_materials") {
+    setNextStep(`材料整理完成，建议先补充材料，也可以直接进入会前访谈。缺口：${readiness.missing_materials?.join("、") || readiness.reason}`, "info");
+  } else if (!hasMessages) {
+    setNextStep("材料已整理。下一步：复制“用户自助访谈链接”发给用户；用户会在聊天页和 AI 自动追问。你也可以手动点击“生成下一问”接管节奏。", "success");
+  } else if (currentSession.session.status === "client_brief_ready") {
+    setNextStep("用户 AI 会前访谈已完成，并已生成会前基本信息整理。下一步可以查看完整聊天记录，并与用户约真人诊断时间。", "success");
+  } else {
+    setNextStep("用户正在回答 AI 追问。等系统生成“会前基本信息整理”后，你就可以根据完整记录约真人诊断时间。", "info");
+  }
+}
+
+function getFreshMaterialOrganizationReport() {
+  const reports = currentSession?.reports || [];
+  const materialOrg = reports.find((r) => r.report_type === "material_organization");
+  const materialStruct = reports.find((r) => r.report_type === "material_structuring");
+  if (!materialOrg) return null;
+  if (!materialStruct) return materialOrg;
+  return materialOrg.created_at >= materialStruct.created_at ? materialOrg : null;
+}
+
+function getLatestReport(type) {
+  return (currentSession?.reports || []).find((r) => r.report_type === type) || null;
+}
+
+function renderManualWorkflow() {
+  if (!currentSession) return;
+  const structReport = getLatestReport("material_structuring");
+  const orgReport = getFreshMaterialOrganizationReport();
+  const selectedType = el("manualTaskType")?.value || "material_structuring";
+  const recommendedType = structReport ? "material_organization" : "material_structuring";
+  if (
+    el("manualTaskType") &&
+    selectedType !== recommendedType &&
+    !el("manualPromptBox").value &&
+    !el("manualOutputBox").value
+  ) {
+    el("manualTaskType").value = recommendedType;
+    updateManualTaskHint();
+  }
+
+  el("manualStepStruct")?.classList.toggle("done", Boolean(structReport));
+  el("manualStepStruct")?.classList.toggle("active", selectedType === "material_structuring" && !structReport);
+  el("manualStepAnalyze")?.classList.toggle("active", selectedType === "material_organization" || Boolean(structReport));
+  el("manualStepAnalyze")?.classList.toggle("done", Boolean(orgReport));
+
+  const context = el("manualContext");
+  if (!context) return;
+  if (!structReport) {
+    context.hidden = true;
+    return;
+  }
+  const data = structReport.content_json || {};
+  context.hidden = false;
+  el("manualContextMeta").textContent = `已保存于 ${formatDate(structReport.created_at)}`;
+  el("manualContextOverview").textContent = data.structured_overview || "第一步材料规整结果已保存，第二步会把它作为 structured_material_draft 带入。";
+  el("manualContextMaterials").textContent = String((data.structured_materials || []).length);
+  el("manualContextCareer").textContent = String((data.career_facts || []).length);
+  el("manualContextProjects").textContent = String((data.project_fact_cards || []).length);
+  el("manualContextCognition").textContent = String((data.method_or_cognitive_expressions || []).length);
+}
+
+function renderChat() {
+  const chat = el("chat");
+  chat.innerHTML = "";
+  (currentSession.conversation || []).forEach((m) => {
+    const bubble = document.createElement("div");
+    bubble.className = `bubble ${m.role}`;
+    let meta = "";
+    if (m.meta_json) {
+      try {
+        const parsed = JSON.parse(m.meta_json);
+        meta = `<div class="meta">${escapeHtml(parsed.focus || "")}${parsed.why ? " · " + escapeHtml(parsed.why) : ""}</div>`;
+      } catch (_) {
+        meta = "";
+      }
+    }
+    bubble.innerHTML = `${escapeHtml(m.content)}${meta}`;
+    chat.appendChild(bubble);
+  });
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function renderReport() {
+  const target = el("report");
+  const materialReport = getFreshMaterialOrganizationReport();
+  const briefReport = getLatestReport("client_pre_session_brief");
+  if (!materialReport && !briefReport) {
+    target.className = "report empty";
+    target.textContent = "还没有生成材料线索或会前准备。请先完成材料分析，再让用户完成 AI 会前访谈。";
+    return;
+  }
+  if (!activeAdvisorReportTab) activeAdvisorReportTab = briefReport ? "brief" : "source";
+  if (activeAdvisorReportTab === "brief" && !briefReport) activeAdvisorReportTab = materialReport ? "source" : "brief";
+  if (activeAdvisorReportTab === "source" && !materialReport) activeAdvisorReportTab = briefReport ? "brief" : "source";
+  target.className = "report";
+  target.innerHTML = `
+    <div class="advisor-report-tabs" role="tablist" aria-label="顾问准备材料切换">
+      <button type="button" data-report-tab="source" class="${activeAdvisorReportTab === "source" ? "active" : ""}" ${materialReport ? "" : "disabled"}>1. 材料线索</button>
+      <button type="button" data-report-tab="brief" class="${activeAdvisorReportTab === "brief" ? "active" : ""}" ${briefReport ? "" : "disabled"}>2. 会前准备</button>
+    </div>
+    <div class="advisor-report-body">
+      ${activeAdvisorReportTab === "brief"
+        ? briefReport ? renderReadableReportSections(clientBriefSections(briefReport.content_json)) : `<p class="muted">用户完成 AI 会前访谈并生成会前整理后，这里会显示准备材料。</p>`
+        : materialReport ? renderReadableReportSections(materialOrganizationSections(materialReport.content_json)) : `<p class="muted">还没有生成材料线索。</p>`}
+    </div>
+  `;
+  target.querySelectorAll("[data-report-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeAdvisorReportTab = button.dataset.reportTab;
+      renderReport();
+    });
+  });
+}
+
+function materialOrganizationSections(report) {
+  return [
+    ["材料就绪判断", report.readiness_assessment],
+    ["材料整理总览", report.overview],
+    ["材料清单", report.material_inventory],
+    ["职业时间线", report.career_timeline],
+    ["项目线索", report.project_clues],
+    ["成就故事候选", report.achievement_story_candidates],
+    ["失败/约束候选", report.failure_or_constraint_candidates],
+    ["能力证据线索", report.ability_evidence_clues],
+    ["认知资产线索", report.cognitive_asset_clues],
+    ["平台依赖线索", report.platform_dependency_clues],
+    ["优先追问地图", report.priority_question_map],
+  ];
+}
+
+function clientBriefSections(report) {
+  return [
+    ["会前整理摘要", report.user_summary],
+    ["已确认信息", report.confirmed_information],
+    ["关键经历线索", report.key_story_clues],
+    ["能力线索", report.ability_clues],
+    ["认知资产线索", report.cognitive_asset_clues],
+    ["真人访谈导航", report.open_questions_for_live_session],
+    ["下次访谈前可准备", report.what_to_prepare_next],
+    ["用户可见下一步", report.user_facing_next_step],
+    ["顾问约访备注", report.advisor_scheduling_note],
+  ];
+}
+
+function renderReadableReportSections(sections) {
+  return sections
+    .map(([title, value]) => renderReadableReportSection(title, value))
+    .join("");
+}
+
+function renderReadableReportSection(title, value) {
+  if (!value || (Array.isArray(value) && value.length === 0)) return "";
+  let body = "";
+  if (typeof value === "string") {
+    body = `<p>${escapeHtml(value).replaceAll("\n", "<br>")}</p>`;
+  } else if (Array.isArray(value)) {
+    body = renderReadableReportCards(value);
+  } else if (typeof value === "object") {
+    body = renderReadableObjectCard(value);
+  } else {
+    body = `<p>${escapeHtml(String(value))}</p>`;
+  }
+  return `<div class="report-section"><h4>${escapeHtml(title)}</h4>${body}</div>`;
+}
+
+function renderReadableReportCards(items) {
+  if (!Array.isArray(items) || items.length === 0) return "";
+  return `<ul class="readable-card-list">${items
+    .slice(0, 12)
+    .map((item) => `<li>${renderReadableObjectLines(item)}</li>`)
+    .join("")}</ul>`;
+}
+
+function renderReadableObjectCard(value) {
+  return `<div class="readable-object-card">${renderReadableObjectLines(value)}</div>`;
+}
+
+function renderReadableObjectLines(value) {
+  if (typeof value !== "object" || value === null) {
+    return escapeHtml(String(value || ""));
+  }
+  return Object.entries(value)
+    .filter(([, itemValue]) => itemValue && (!Array.isArray(itemValue) || itemValue.length > 0))
+    .map(([key, itemValue]) => {
+      const text = Array.isArray(itemValue)
+        ? itemValue.slice(0, 8).map((item) => formatReadableValue(item)).join("；")
+        : formatReadableValue(itemValue);
+      return `<div><b>${escapeHtml(reportFieldLabel(key))}</b>${escapeHtml(text)}</div>`;
+    })
+    .join("");
+}
+
+function formatReadableValue(value) {
+  if (typeof value === "object" && value !== null) {
+    return Object.entries(value)
+      .filter(([, nestedValue]) => nestedValue && (!Array.isArray(nestedValue) || nestedValue.length > 0))
+      .map(([key, nestedValue]) => `${reportFieldLabel(key)}${Array.isArray(nestedValue) ? nestedValue.join("；") : nestedValue}`)
+      .join("；");
+  }
+  return String(value);
+}
+
+function reportFieldLabel(key) {
+  return {
+    status: "状态：",
+    reason: "原因：",
+    missing_materials: "缺少材料：",
+    suggested_user_request: "给用户的补充请求：",
+    if_continue_interview_first_questions: "继续访谈优先问：",
+    advisor_recommendation: "顾问建议：",
+    name: "材料：",
+    type: "类型：",
+    summary: "摘要：",
+    limitations: "局限：",
+    period: "时间：",
+    role_or_context: "角色/场景：",
+    facts: "事实：",
+    evidence_source: "来源：",
+    project: "经历：",
+    known_facts: "已知：",
+    known_results: "结果：",
+    missing_for_star: "待补：",
+    story: "故事：",
+    why_candidate: "价值：",
+    event: "事件：",
+    why_useful: "为什么重要：",
+    missing_questions: "待问：",
+    ability_hint: "线索：",
+    evidence: "证据：",
+    risk: "风险：",
+    next_questions: "下一问：",
+    level: "层级：",
+    clue: "线索：",
+    maturity_guess: "成熟度：",
+    case_or_ability: "案例/能力：",
+    possible_platform_factors: "可能的平台因素：",
+    priority: "优先级：",
+    question: "问题：",
+    why: "原因：",
+    title: "信息：",
+    details: "详情：",
+    source: "来源：",
+    current_judgment: "判断：",
+    risk_or_gap: "风险：",
+    next_validation: "验证：",
+  }[key] || `${key}：`;
+}
+
+function renderMaterialDecision() {
+  const panel = el("materialDecision");
+  if (!panel || !currentSession) return;
+  const materialOrg = getFreshMaterialOrganizationReport();
+  const readiness = materialOrg?.content_json?.readiness_assessment;
+  if (!readiness) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const statusLabels = {
+    ready_for_interview: "可以进入会前访谈",
+    suggest_more_materials: "建议补材料，也可以进入访谈",
+    must_collect_more_materials: "建议先补材料",
+  };
+  const status = readiness.status || "unknown";
+  el("decisionStatus").textContent = statusLabels[status] || status;
+  el("decisionStatus").className = `decision-status ${status}`;
+  el("decisionReason").textContent = readiness.reason || "材料分析已完成，请根据缺口决定下一步。";
+  const missing = readiness.missing_materials || [];
+  el("decisionMissing").textContent = missing.length ? JSON.stringify(missing, null, 2) : "暂无明确缺口。";
+  el("decisionUserRequest").value = readiness.suggested_user_request || "";
+  const questions = readiness.if_continue_interview_first_questions || [];
+  el("decisionInterviewQuestions").textContent = questions.length ? JSON.stringify(questions, null, 2) : "可直接进入会前访谈，让 AI 从基础经历继续追问。";
+  el("decisionAdvisor").textContent = readiness.advisor_recommendation || "";
+}
+
+async function organizeMaterials() {
+  if (aiBusy) return;
+  if (!currentSessionId) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    setNextStep("还没有诊断档案。请先在左侧填写用户信息并创建档案。", "error");
+    return;
+  }
+  if (!currentSession || (currentSession.files || []).length === 0) {
+    showFeedback("还没有保存任何材料。请先上传文件、链接或补充文本，并点击“保存材料”。", "error");
+    setNextStep("第一步还没完成：请先保存至少一份材料。", "error");
+    return;
+  }
+  setAiBusy(true);
+  showOrganizeProgress();
+  try {
+    await api(`/api/sessions/${currentSessionId}/organize`, { method: "POST" });
+    completeOrganizeProgress();
+    await loadHealth();
+    await selectSession(currentSessionId);
+    showFeedback("材料整理完成。可以复制用户自助访谈链接，让用户进入会前访谈页和 AI 继续聊。", "success");
+  } catch (err) {
+    failOrganizeProgress(err.message);
+    showFeedback(`整理材料失败：${err.message}`, "error");
+    setNextStep(`整理失败：${err.message}`, "error");
+  } finally {
+    setAiBusy(false);
+  }
+}
+
+async function createSession(e) {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+  const form = new FormData(formEl);
+  const payload = Object.fromEntries(form.entries());
+  showBusy("创建诊断档案...");
+  try {
+    const data = await api("/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    formEl.reset();
+    await selectSession(data.id);
+    showFeedback("诊断档案已创建。现在可以上传三种材料：文件、链接、补充文本。", "success");
+  } catch (err) {
+    showFeedback(`创建失败：${err.message}`, "error");
+  } finally {
+    hideBusy();
+  }
+}
+
+async function uploadMaterials(e) {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+  if (!currentSessionId) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    return;
+  }
+  const form = new FormData(formEl);
+  const hasFiles = formEl.elements.files.files.length > 0;
+  const hasLinks = (form.get("links") || "").trim().length > 0;
+  const hasNotes = (form.get("notes") || "").trim().length > 0;
+  if (!hasFiles && !hasLinks && !hasNotes) {
+    showFeedback("请至少上传一种材料：文件、链接或补充文本。", "error");
+    return;
+  }
+  showBusy("保存并抽取材料...");
+  try {
+    const result = await api(`/api/sessions/${currentSessionId}/upload`, { method: "POST", body: form });
+    formEl.reset();
+    await selectSession(currentSessionId);
+    const names = (result.saved || []).map((x) => x.name).join("、");
+    showFeedback(`已保存 ${result.saved?.length || 0} 份材料：${names || "材料"}。下一步请在“网页版 AI 人工处理”里生成材料规整输入。`, "success");
+  } catch (err) {
+    showFeedback(`保存材料失败：${err.message}`, "error");
+  } finally {
+    hideBusy();
+  }
+}
+
+async function submitMessage(e) {
+  e.preventDefault();
+  const formEl = e.currentTarget;
+  if (!currentSessionId) return showFeedback("请先创建或选择一个诊断档案。", "error");
+  const textarea = formEl.elements.content;
+  const content = textarea.value.trim();
+  if (!content) return;
+  showBusy("保存回答...");
+  try {
+    await api(`/api/sessions/${currentSessionId}/message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    textarea.value = "";
+    await selectSession(currentSessionId);
+  } catch (err) {
+    showFeedback(`保存回答失败：${err.message}`, "error");
+  } finally {
+    hideBusy();
+  }
+}
+
+async function askNext() {
+  if (aiBusy) return;
+  if (!currentSessionId) return showFeedback("请先创建或选择一个诊断档案。", "error");
+  setAiBusy(true);
+  showBusy("AI 正在阅读材料并生成追问...");
+  try {
+    await api(`/api/sessions/${currentSessionId}/next-question`, { method: "POST" });
+    await loadHealth();
+    await selectSession(currentSessionId);
+  } catch (err) {
+    showFeedback(`生成追问失败：${err.message}`, "error");
+    setNextStep(`生成追问失败：${err.message}`, "error");
+  } finally {
+    setAiBusy(false);
+    hideBusy();
+  }
+}
+
+async function generateReport() {
+  if (aiBusy) return;
+  if (!currentSessionId) return showFeedback("请先创建或选择一个诊断档案。", "error");
+  setAiBusy(true);
+  showBusy("AI 正在整理真人审阅材料...");
+  try {
+    await api(`/api/sessions/${currentSessionId}/report`, { method: "POST" });
+    await loadHealth();
+    await selectSession(currentSessionId);
+  } catch (err) {
+    showFeedback(`生成审阅包失败：${err.message}`, "error");
+    setNextStep(`生成审阅包失败：${err.message}`, "error");
+  } finally {
+    setAiBusy(false);
+    hideBusy();
+  }
+}
+
+async function generateManualPrompt() {
+  if (!currentSessionId) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    return;
+  }
+  if (!currentSession || (currentSession.files || []).length === 0) {
+    showFeedback("请先保存至少一份材料，再生成网页版输入。", "error");
+    return;
+  }
+  const type = el("manualTaskType").value || "material_structuring";
+  if (type === "material_organization" && !getLatestReport("material_structuring")) {
+    showFeedback("请先完成并保存第 1 步“材料规整”，第 2 步会自动带入第一步结果。", "error");
+    setNextStep("还缺第 1 步材料规整结果。请先生成材料规整输入，并保存网页版输出。", "error");
+    return;
+  }
+  showBusy(`正在生成${MANUAL_TASK_LABELS[type]}输入...`);
+  try {
+    setManualSaveStatus("", "info");
+    const data = await api(`/api/sessions/${currentSessionId}/manual-ai-prompt`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
+    el("manualPromptBox").value = data.prompt;
+    showFeedback(`${MANUAL_TASK_LABELS[type]}输入包已生成，可以复制到 GPT 网页版。`, "success");
+    setNextStep(`把“${MANUAL_TASK_LABELS[type]}”输入包复制到 GPT 网页版。拿到完整 JSON 后，粘回“网页版输出”并点击保存。`, "success");
+  } catch (err) {
+    showFeedback(`生成网页版输入失败：${err.message}`, "error");
+  } finally {
+    hideBusy();
+  }
+}
+
+async function copyManualPrompt() {
+  const text = el("manualPromptBox").value.trim();
+  if (!text) {
+    showFeedback("还没有网页版输入，请先点击“生成网页版输入”。", "error");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showFeedback("网页版输入已复制。", "success");
+  } catch (_) {
+    el("manualPromptBox").select();
+    showFeedback("浏览器没有开放自动复制权限，已帮你选中输入内容，可以手动复制。", "info");
+  }
+}
+
+async function importManualOutput() {
+  if (!currentSessionId) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    return;
+  }
+  const type = el("manualTaskType").value || "material_structuring";
+  const content = el("manualOutputBox").value.trim();
+  if (!content) {
+    showFeedback("请先粘贴 GPT 网页版返回的完整 JSON。", "error");
+    setManualSaveStatus("还没有粘贴 GPT 网页版返回的完整 JSON。", "error");
+    return;
+  }
+  showBusy(`正在保存${MANUAL_TASK_LABELS[type]}输出...`);
+  try {
+    setManualSaveStatus("正在保存并校验 JSON...", "info");
+    await api(`/api/sessions/${currentSessionId}/manual-ai-output`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, content }),
+    });
+    el("manualOutputBox").value = "";
+    await selectSession(currentSessionId);
+    showFeedback(`${MANUAL_TASK_LABELS[type]}输出已保存到本地数据库。`, "success");
+    setManualSaveStatus(`${MANUAL_TASK_LABELS[type]}已保存成功。`, "success");
+  if (type === "material_structuring") {
+      el("manualTaskType").value = "material_organization";
+      el("manualPromptBox").value = "";
+      el("manualOutputBox").value = "";
+      updateManualTaskHint();
+      renderManualWorkflow();
+      setNextStep("材料规整已保存，并已自动切到第 2 步“材料分析”。第二步会带入原始材料和第一步规整结果。", "success");
+    } else if (type === "material_organization") {
+      setNextStep("材料分析已保存。请查看“材料就绪判断”，决定先让用户补材料，还是直接进入会前访谈。", "success");
+    }
+  } catch (err) {
+    showFeedback(`保存网页版输出失败：${err.message}`, "error");
+    setManualSaveStatus(`没有保存成功：${err.message}。请确认从第一个 { 复制到最后一个 }，不要漏掉末尾内容。`, "error");
+    el("manualOutputBox").focus();
+  } finally {
+    hideBusy();
+  }
+}
+
+function updateManualTaskHint() {
+  const type = el("manualTaskType")?.value || "material_structuring";
+  if (el("manualTaskHint")) {
+    const relation =
+      type === "material_organization"
+        ? "本步输入会同时包含用户原始材料，以及第 1 步保存的 structured_material_draft。"
+        : "";
+    el("manualTaskHint").textContent = [MANUAL_TASK_HINTS[type], relation].filter(Boolean).join(" ");
+  }
+  renderManualWorkflow();
+}
+
+async function copyClientLink() {
+  const text = el("clientLink").value.trim();
+  if (!text) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showFeedback("用户自助访谈链接已复制。", "success");
+  } catch (_) {
+    el("clientLink").select();
+    showFeedback("浏览器没有开放自动复制权限，已帮你选中链接，可以手动复制。", "info");
+  }
+}
+
+async function copyMaterialRequest() {
+  const text = el("decisionUserRequest")?.value.trim();
+  if (!text) {
+    showFeedback("当前没有可复制的补材料请求。", "error");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showFeedback("补材料请求已复制。", "success");
+  } catch (_) {
+    el("decisionUserRequest").select();
+    showFeedback("浏览器没有开放自动复制权限，已帮你选中内容，可以手动复制。", "info");
+  }
+}
+
+function openClientLink() {
+  const text = el("clientLink").value.trim();
+  if (!text) {
+    showFeedback("请先创建或选择一个诊断档案。", "error");
+    return;
+  }
+  window.open(text, "_blank", "noopener,noreferrer");
+}
+
+function clearCurrent() {
+  currentSessionId = null;
+  currentSession = null;
+  el("pageTitle").textContent = "能力资产与认知资产诊断";
+  el("sessionStatus").textContent = "未开始";
+  el("fileList").innerHTML = "";
+  el("savedCount").textContent = "0 份";
+  el("clientLink").value = "";
+  el("chat").innerHTML = "";
+  if (el("manualPromptBox")) el("manualPromptBox").value = "";
+  if (el("manualOutputBox")) el("manualOutputBox").value = "";
+  if (el("manualTaskType")) {
+    el("manualTaskType").value = "material_structuring";
+    updateManualTaskHint();
+  }
+  el("report").className = "report empty";
+  el("report").textContent = "还没有生成材料整理包或审阅材料。请先完成第一步上传材料，再点击“整理材料”。";
+  showFeedback("", "info");
+  setNextStep("先创建诊断档案，再上传材料。", "info");
+  loadSessions();
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  el("adminLoginForm")?.addEventListener("submit", loginAdmin);
+  el("sessionForm").addEventListener("submit", createSession);
+  el("apiKeyForm").addEventListener("submit", saveApiKey);
+  el("uploadForm").addEventListener("submit", uploadMaterials);
+  el("messageForm").addEventListener("submit", submitMessage);
+  el("organizeBtn").addEventListener("click", organizeMaterials);
+  el("askBtn").addEventListener("click", askNext);
+  el("reportBtn").addEventListener("click", generateReport);
+  el("manualPromptBtn").addEventListener("click", generateManualPrompt);
+  el("copyManualPromptBtn").addEventListener("click", copyManualPrompt);
+  el("importManualOutputBtn").addEventListener("click", importManualOutput);
+  el("manualTaskType").addEventListener("change", updateManualTaskHint);
+  el("copyClientLinkBtn").addEventListener("click", copyClientLink);
+  el("openClientLinkBtn").addEventListener("click", openClientLink);
+  el("copyMaterialRequestBtn").addEventListener("click", copyMaterialRequest);
+  el("copyClientLinkFromDecisionBtn").addEventListener("click", copyClientLink);
+  el("openClientLinkFromDecisionBtn").addEventListener("click", openClientLink);
+  el("newSessionBtn").addEventListener("click", clearCurrent);
+  updateManualTaskHint();
+  const canLoad = await loadAuthStatus();
+  if (!canLoad) return;
+  await initAdvisorWorkspace();
+});
+
+async function initAdvisorWorkspace() {
+  await loadHealth();
+  await loadSessions();
+}

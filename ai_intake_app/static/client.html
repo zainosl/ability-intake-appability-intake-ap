@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>能力资产诊断 · 会前访谈</title>
+    <link rel="stylesheet" href="/static/styles.css?v=20260620u" />
+  </head>
+  <body class="client-body">
+    <main class="client-shell">
+      <section class="client-hero">
+        <p class="eyebrow">能力资产诊断 · 会前访谈</p>
+        <h1 id="clientTitle">正在载入...</h1>
+        <p id="clientIntro">请根据问题补充真实经历。越具体，后续真人咨询越有效。</p>
+      </section>
+
+      <section class="client-workbench">
+        <aside class="panel client-material-panel" id="clientMaterialPanel">
+          <div class="panel-head">
+            <h3>会前材料</h3>
+            <span>按阶段切换查看</span>
+          </div>
+          <div class="client-material-tabs" role="tablist" aria-label="会前材料切换">
+            <button id="clientSourceTab" type="button" role="tab">1. 材料线索</button>
+            <button id="clientBriefTab" type="button" role="tab">2. 会前准备</button>
+          </div>
+          <div id="clientMaterialSummary" class="client-material-summary"></div>
+        </aside>
+
+        <section class="panel client-panel">
+          <div class="panel-head">
+            <h3>AI 追问</h3>
+            <span id="clientStatus">载入中</span>
+          </div>
+          <div class="client-progress" id="clientProgress">
+            <div class="client-progress-top">
+              <strong id="clientProgressTitle">会前访谈进度</strong>
+              <span id="clientProgressMeta">正在判断信息充分度</span>
+            </div>
+            <div class="client-progress-bar" aria-hidden="true">
+              <span id="clientProgressFill"></span>
+            </div>
+            <p id="clientProgressHint">完成后会生成一份会前基本信息，供你和顾问共同查看。</p>
+          </div>
+          <div class="next-step" id="clientNextStep">正在读取你的访谈进度...</div>
+          <div class="client-start-row">
+            <button id="clientStartBtn" class="primary" type="button">开始 AI 会前访谈</button>
+          </div>
+          <div class="chat client-chat" id="clientChat"></div>
+          <form id="clientReplyForm" class="reply">
+            <textarea name="content" rows="5" placeholder="请尽量用具体事件回答：背景、你做了什么、结果、别人怎么反馈。"></textarea>
+            <button class="primary" type="submit">提交回答</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="busyDialog">
+      <div class="loader"></div>
+      <p id="busyText">处理中...</p>
+    </dialog>
+
+    <script src="/static/client.js?v=20260620u"></script>
+  </body>
+</html>
