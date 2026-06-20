@@ -49,7 +49,8 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 LAST_USED_MODEL = ""
 MODEL_REQUEST_TIMEOUT_SECONDS = int(os.environ.get("MODEL_REQUEST_TIMEOUT_SECONDS", "180"))
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "").strip()
+ADMIN_AUTH_ENABLED = os.environ.get("ADMIN_AUTH_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "").strip() if ADMIN_AUTH_ENABLED else ""
 
 
 def admin_token():
@@ -1973,7 +1974,7 @@ def main():
     if ADMIN_PASSWORD:
         print("Admin auth: enabled")
     else:
-        print("Admin auth: disabled. Set ADMIN_PASSWORD before public deployment.")
+        print("Admin auth: disabled. Set ADMIN_AUTH_ENABLED=1 and ADMIN_PASSWORD before public deployment if needed.")
     if OPENAI_API_KEY:
         print(f"Model config: {DEFAULT_MODEL} via {OPENAI_BASE_URL}")
     if not OPENAI_API_KEY:
