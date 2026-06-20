@@ -1849,6 +1849,61 @@ dialog::backdrop,
   backdrop-filter: blur(12px);
 }
 
+body input,
+body textarea,
+body select,
+body .manual-ai textarea,
+body .manual-ai select,
+body .field textarea,
+body .field input {
+  background-color: rgba(6, 8, 10, 0.72) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
+  color-scheme: dark;
+}
+
+body textarea[readonly],
+body input[readonly],
+body .manual-ai textarea[readonly] {
+  background-color: rgba(17, 20, 24, 0.82) !important;
+  color: var(--ink) !important;
+}
+
+body input::placeholder,
+body textarea::placeholder {
+  color: rgba(169, 176, 186, 0.56) !important;
+  opacity: 1;
+}
+
+body input:focus,
+body textarea:focus,
+body select:focus {
+  background-color: rgba(7, 11, 12, 0.92) !important;
+  border-color: rgba(88, 225, 193, 0.68) !important;
+  box-shadow: 0 0 0 3px rgba(88, 225, 193, 0.12), inset 0 0 0 1px rgba(88, 225, 193, 0.08);
+}
+
+body select option {
+  background: #111418;
+  color: var(--ink);
+}
+
+body input:-webkit-autofill,
+body input:-webkit-autofill:hover,
+body input:-webkit-autofill:focus,
+body textarea:-webkit-autofill,
+body textarea:-webkit-autofill:hover,
+body textarea:-webkit-autofill:focus,
+body select:-webkit-autofill,
+body select:-webkit-autofill:hover,
+body select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--ink);
+  box-shadow: 0 0 0 1000px #0b0d0f inset !important;
+  border-color: rgba(88, 225, 193, 0.45) !important;
+}
+
 .admin-gate-card {
   background: var(--panel);
   border-color: var(--line-strong);
