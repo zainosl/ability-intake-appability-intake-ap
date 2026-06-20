@@ -1652,7 +1652,7 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == "/client.js":
                 return self.serve_file(STATIC_DIR / "client.js", "application/javascript; charset=utf-8")
             if parsed.path.startswith("/static/"):
-                rel = parsed.path.removeprefix("/static/")
+                rel = parsed.path[len("/static/") :]
                 return self.serve_file(STATIC_DIR / rel)
             if parsed.path == "/api/health":
                 return self.json({
