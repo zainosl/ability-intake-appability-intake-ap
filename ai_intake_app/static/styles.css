@@ -1447,3 +1447,439 @@ dialog::backdrop {
   }
 
 }
+
+/* Qiaoboose AI Native brand skin */
+:root {
+  --bg: #0b0d0f;
+  --panel: #111418;
+  --panel-2: #15191e;
+  --panel-3: #1c2026;
+  --ink: #f7f8fa;
+  --muted: #a9b0ba;
+  --dim: #69727d;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --green: #58e1c1;
+  --green-soft: rgba(88, 225, 193, 0.1);
+  --blue: #8fa0ff;
+  --yellow: #e4c35a;
+  --yellow-soft: rgba(228, 195, 90, 0.12);
+  --danger: #ff8b82;
+  --danger-soft: rgba(255, 139, 130, 0.12);
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+html {
+  background: var(--bg);
+}
+
+body,
+.client-body {
+  background:
+    linear-gradient(rgba(88, 225, 193, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88, 225, 193, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 82% 8%, rgba(88, 225, 193, 0.08), transparent 30%),
+    var(--bg);
+  background-size: 56px 56px, 56px 56px, auto, auto;
+  color: var(--ink);
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body::selection {
+  background: rgba(88, 225, 193, 0.3);
+}
+
+button,
+input,
+select,
+textarea {
+  color: var(--ink);
+}
+
+button {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--ink);
+  border-radius: 4px;
+}
+
+button:hover {
+  border-color: rgba(88, 225, 193, 0.45);
+  background: rgba(88, 225, 193, 0.08);
+  color: var(--green);
+}
+
+.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: #07110f;
+  font-weight: 800;
+}
+
+.primary:hover {
+  background: #70f0d3;
+  color: #07110f;
+}
+
+input,
+select,
+textarea {
+  border-color: var(--line);
+  background: rgba(6, 8, 10, 0.62);
+  color: var(--ink);
+  border-radius: 4px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(169, 176, 186, 0.58);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 1px solid rgba(88, 225, 193, 0.52);
+  border-color: rgba(88, 225, 193, 0.6);
+}
+
+.sidebar {
+  background: rgba(11, 13, 15, 0.88);
+  border-right-color: var(--line);
+  box-shadow: inset -1px 0 0 rgba(88, 225, 193, 0.04);
+}
+
+.brand {
+  align-items: flex-start;
+}
+
+.mark {
+  border-radius: 4px;
+  background: rgba(88, 225, 193, 0.1);
+  border: 1px solid rgba(88, 225, 193, 0.42);
+  color: var(--green);
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 900;
+  box-shadow: 0 0 0 1px rgba(88, 225, 193, 0.04) inset;
+}
+
+.brand h1,
+.topbar h2,
+.client-hero h1,
+.panel-head h3,
+.muted-block h4,
+.report-section h4,
+.decision-grid h4 {
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.brand p,
+.eyebrow,
+.panel-head span,
+.saved-head span,
+.empty-list,
+.manual-ai-head span,
+.manual-context-head span,
+.client-material-label,
+.client-progress-top span,
+.client-progress p,
+.client-brief-notice-head span,
+.bubble .meta,
+.report.empty,
+label,
+.muted-block p,
+.input-card span,
+.session-card span,
+.client-link-box span {
+  color: var(--muted);
+}
+
+.eyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.workspace,
+.client-shell {
+  position: relative;
+}
+
+.panel,
+.session-card,
+.input-card,
+.client-link-box,
+.manual-ai,
+.decision-panel,
+.progress-card,
+.next-step,
+.client-progress,
+.client-readiness,
+.client-material-section,
+.manual-context,
+.manual-context-grid div,
+.manual-save-status,
+.json-card,
+.readable-card-list li,
+.readable-object-card,
+.file-item,
+.empty-list {
+  background: rgba(17, 20, 24, 0.86);
+  border-color: var(--line);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.panel {
+  box-shadow: var(--shadow);
+}
+
+.panel-head,
+.reply,
+.divider,
+.saved-materials,
+.method-strip,
+.advisor-report-body,
+.report-section,
+.decision-advisor {
+  border-color: var(--line);
+}
+
+.panel-head {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.session-card:hover,
+.input-card:hover,
+.file-item:hover,
+.readable-card-list li:hover,
+.readable-object-card:hover {
+  border-color: rgba(88, 225, 193, 0.32);
+}
+
+.session-card.active {
+  border-color: rgba(88, 225, 193, 0.65);
+  background: rgba(88, 225, 193, 0.1);
+}
+
+.status,
+.client-material-tabs,
+.advisor-report-tabs,
+.manual-save-status,
+.progress-steps span,
+.decision-status {
+  background: rgba(6, 8, 10, 0.5);
+  border-color: var(--line);
+  color: var(--muted);
+  border-radius: 4px;
+}
+
+.client-material-tabs button.active,
+.advisor-report-tabs button.active {
+  background: rgba(88, 225, 193, 0.12);
+  color: var(--green);
+  box-shadow: none;
+}
+
+.client-material-tabs button,
+.advisor-report-tabs button {
+  border-radius: 3px;
+}
+
+.status.ready,
+.save-feedback.success,
+.manual-save-status.success,
+.decision-status.ready_for_interview,
+.client-readiness.ready_for_interview,
+.next-step.success,
+.progress-card.done,
+.client-brief-notice {
+  border-color: rgba(88, 225, 193, 0.42);
+  background: rgba(88, 225, 193, 0.1);
+  color: var(--green);
+}
+
+.status.warn,
+.decision-status.suggest_more_materials,
+.client-readiness.suggest_more_materials,
+.manual-ai-note {
+  border-color: rgba(228, 195, 90, 0.44);
+  background: var(--yellow-soft);
+  color: var(--yellow);
+}
+
+.status.error,
+.save-feedback.error,
+.manual-save-status.error,
+.decision-status.must_collect_more_materials,
+.client-readiness.must_collect_more_materials,
+.next-step.error,
+.progress-card.failed,
+.bubble.transient.error {
+  border-color: rgba(255, 139, 130, 0.48);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.step-note,
+.method-strip span,
+.progress-steps span.active {
+  border-color: rgba(88, 225, 193, 0.3);
+  background: rgba(88, 225, 193, 0.1);
+  color: var(--green);
+}
+
+.method-strip span {
+  border: 1px solid rgba(88, 225, 193, 0.24);
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.progress-track,
+.client-progress-bar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.progress-fill,
+.client-progress-bar span,
+.thinking-dots i {
+  background: var(--green);
+}
+
+.manual-flow-line {
+  background: var(--line);
+}
+
+.manual-flow-step {
+  background: rgba(6, 8, 10, 0.34);
+  border-color: var(--line);
+  border-radius: 4px;
+}
+
+.manual-flow-step.active {
+  border-color: rgba(143, 160, 255, 0.48);
+  background: rgba(143, 160, 255, 0.12);
+}
+
+.manual-flow-step.done {
+  border-color: rgba(88, 225, 193, 0.42);
+  background: rgba(88, 225, 193, 0.1);
+}
+
+.chat,
+.client-chat {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    rgba(6, 8, 10, 0.32);
+  background-size: 44px 44px;
+}
+
+.bubble {
+  border-radius: 6px;
+}
+
+.bubble.user,
+.client-chat .bubble.user {
+  background: rgba(88, 225, 193, 0.13);
+  border-color: rgba(88, 225, 193, 0.38);
+  color: var(--ink);
+}
+
+.bubble.assistant,
+.client-chat .bubble.assistant {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.bubble.transient.pending {
+  color: var(--muted);
+}
+
+.retry-row button {
+  background: rgba(255, 139, 130, 0.08);
+  border-color: rgba(255, 139, 130, 0.42);
+  color: var(--danger);
+}
+
+.client-hero {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+  padding: 0 6px 18px;
+}
+
+.client-hero h1 {
+  color: var(--ink);
+  font-size: 32px;
+}
+
+.client-hero p {
+  color: var(--muted);
+}
+
+.client-panel,
+.client-material-panel {
+  backdrop-filter: blur(14px);
+}
+
+.client-material-section summary {
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--ink);
+}
+
+.client-material-section li {
+  border-top-color: var(--line);
+}
+
+.json-card {
+  color: var(--muted);
+}
+
+dialog {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+dialog::backdrop,
+.admin-gate {
+  background: rgba(6, 8, 10, 0.78);
+  backdrop-filter: blur(12px);
+}
+
+.admin-gate-card {
+  background: var(--panel);
+  border-color: var(--line-strong);
+  border-radius: 6px;
+}
+
+.loader {
+  border-color: rgba(88, 225, 193, 0.16);
+  border-top-color: var(--green);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(88, 225, 193, 0.24);
+  border: 2px solid rgba(11, 13, 15, 0.9);
+}
+
+@media (max-width: 1040px) {
+  .sidebar {
+    border-bottom-color: var(--line);
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+}
