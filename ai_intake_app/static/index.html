@@ -9,8 +9,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>能力资产诊断 · AI 前置采集</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260621formfix" />
-    <link rel="stylesheet" href="styles.css?v=20260621formfix" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260621export" />
+    <link rel="stylesheet" href="styles.css?v=20260621export" />
   </head>
   <body>
     <div class="admin-gate" id="adminGate" hidden>
@@ -132,11 +132,6 @@
         <div class="panel chat-panel">
           <div class="panel-head">
             <h3>2. 整理与追问</h3>
-            <div class="actions">
-              <button id="organizeBtn">API整理材料（可选）</button>
-              <button id="askBtn">API生成下一问（可选）</button>
-              <button id="reportBtn">API真人审阅包（可选）</button>
-            </div>
           </div>
           <div class="method-strip">
             <span>BEI/STAR</span>
@@ -264,8 +259,11 @@
 
       <section class="panel report-panel">
         <div class="panel-head">
-          <h3>3. 顾问准备材料</h3>
-          <span>按标签切换材料线索与会前准备</span>
+          <div>
+            <h3>3. 顾问准备材料</h3>
+            <span>按标签切换材料线索与会前准备</span>
+          </div>
+          <button id="downloadMarkdownBtn" type="button" class="secondary">下载 Markdown</button>
         </div>
         <div id="report" class="report empty">
           还没有生成材料线索或会前准备。请先完成材料分析，再让用户完成 AI 会前访谈。
@@ -278,11 +276,11 @@
       <p id="busyText">处理中...</p>
     </dialog>
 
-    <script src="/static/app.js?v=20260621formfix"></script>
+    <script src="/static/app.js?v=20260621export"></script>
     <script>
       if (!window.__abilityIntakeLoaded) {
         const script = document.createElement("script");
-        script.src = "app.js?v=20260621formfix";
+        script.src = "app.js?v=20260621export";
         document.body.appendChild(script);
       }
     </script>

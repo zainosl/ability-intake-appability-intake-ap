@@ -246,6 +246,8 @@ function renderSession() {
   const s = currentSession.session;
   el("pageTitle").textContent = `${s.client_name} · 能力资产与认知资产诊断`;
   el("sessionStatus").textContent = s.status;
+  const downloadButton = el("downloadMarkdownBtn");
+  if (downloadButton) downloadButton.disabled = false;
   renderClientLink(s.id);
   renderFiles();
   renderManualWorkflow();
@@ -546,6 +548,211 @@ function reportFieldLabel(key) {
     risk_or_gap: "风险：",
     next_validation: "验证：",
   }[key] || `${key}：`;
+}
+
+function downloadAdvisorMarkdown() {
+  if (!currentSession) {
+    showFeedback("请先创建或选择一个诊断档案，再下载 Markdown。", "error");
+    return;
+  }
+  const markdown = buildAdvisorMarkdown();
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = advisorMarkdownFilename();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showFeedback("已生成 Markdown 工作底稿。", "success");
+}
+
+function buildAdvisorMarkdown() {
+  const session = currentSession.session || {};
+  const materialStruct = getLatestReport("material_structuring");
+  const materialOrg = getFreshMaterialOrganizationReport();
+  const briefReport = getLatestReport("client_pre_session_brief");
+  const lines = [];
+  lines.push(`# ${mdText(session.client_name || "未命名客户")} · 能力资产诊断工作底稿`);
+  lines.push("");
+  lines.push(`> 导出时间：${formatDate(new Date().toISOString())}`);
+  lines.push(`> 档案状态：${mdText(session.status || "未知")}`);
+  lines.push("");
+  lines.push("## 1. 档案信息");
+  lines.push("");
+  lines.push(`- 用户姓名：${mdText(session.client_name || "")}`);
+  lines.push(`- 联系方式：${mdText(session.contact || "")}`);
+  lines.push(`- 当前困惑：${mdText(session.goal || "")}`);
+  lines.push(`- 创建时间：${formatDate(session.created_at)}`);
+  lines.push(`- 更新时间：${formatDate(session.updated_at)}`);
+  lines.push("");
+  lines.push("## 2. 整理后的用户原始材料");
+  lines.push("");
+  appendCleanMaterialExcerpts(lines);
+  appendReportToMarkdown(lines, "### 2.1 材料规整底稿", materialStruct?.content_json, [
+    ["材料规整总览", "structured_overview"],
+    ["材料清单", "structured_materials"],
+    ["职业事实", "career_facts"],
+    ["项目事实卡", "project_fact_cards"],
+    ["方法/认知表达", "method_or_cognitive_expressions"],
+    ["明显缺口", "obvious_gaps"],
+  ]);
+  appendReportToMarkdown(lines, "## 3. 顾问准备材料：材料线索", materialOrg?.content_json, materialOrganizationSectionsForMarkdown());
+  appendReportToMarkdown(lines, "## 4. 顾问准备材料：会前准备", briefReport?.content_json, clientBriefSectionsForMarkdown());
+  appendConversationToMarkdown(lines);
+  lines.push("");
+  return `${lines.join("\n")}\n`;
+}
+
+function appendCleanMaterialExcerpts(lines) {
+  const materials = currentSession.materials || [];
+  if (!materials.length) {
+    lines.push("_暂无已抽取材料。_");
+    lines.push("");
+    return;
+  }
+  materials.forEach((material, index) => {
+    lines.push(`### 2.0.${index + 1} ${mdText(material.name || `材料 ${index + 1}`)}`);
+    lines.push("");
+    lines.push(`- 清洗后长度：${material.length || 0} 字`);
+    lines.push(`- 原始长度：${material.raw_length || 0} 字`);
+    if (material.cleaning_notes?.length) {
+      lines.push("- 清洗说明：");
+      material.cleaning_notes.forEach((note) => lines.push(`  - ${mdText(note)}`));
+    }
+    lines.push("");
+    lines.push("```text");
+    lines.push(String(material.excerpt || "").trim() || "无内容");
+    lines.push("```");
+    lines.push("");
+  });
+}
+
+function appendReportToMarkdown(lines, title, report, sections) {
+  lines.push(title);
+  lines.push("");
+  if (!report) {
+    lines.push("_暂无内容。_");
+    lines.push("");
+    return;
+  }
+  sections.forEach(([sectionTitle, key]) => {
+    const value = report[key];
+    if (!hasMarkdownValue(value)) return;
+    lines.push(`### ${mdText(sectionTitle)}`);
+    lines.push("");
+    lines.push(markdownValue(value));
+    lines.push("");
+  });
+}
+
+function materialOrganizationSectionsForMarkdown() {
+  return [
+    ["材料就绪判断", "readiness_assessment"],
+    ["材料整理总览", "overview"],
+    ["材料清单", "material_inventory"],
+    ["职业时间线", "career_timeline"],
+    ["项目线索", "project_clues"],
+    ["成就故事候选", "achievement_story_candidates"],
+    ["失败/约束候选", "failure_or_constraint_candidates"],
+    ["能力证据线索", "ability_evidence_clues"],
+    ["认知资产线索", "cognitive_asset_clues"],
+    ["平台依赖线索", "platform_dependency_clues"],
+    ["优先追问地图", "priority_question_map"],
+  ];
+}
+
+function clientBriefSectionsForMarkdown() {
+  return [
+    ["会前整理摘要", "user_summary"],
+    ["已确认信息", "confirmed_information"],
+    ["关键经历线索", "key_story_clues"],
+    ["能力线索", "ability_clues"],
+    ["认知资产线索", "cognitive_asset_clues"],
+    ["真人访谈导航", "open_questions_for_live_session"],
+    ["下次访谈前可准备", "what_to_prepare_next"],
+    ["用户可见下一步", "user_facing_next_step"],
+    ["顾问约访备注", "advisor_scheduling_note"],
+  ];
+}
+
+function appendConversationToMarkdown(lines) {
+  const messages = currentSession.conversation || [];
+  lines.push("## 5. 用户 AI 会前访谈记录");
+  lines.push("");
+  if (!messages.length) {
+    lines.push("_暂无会前访谈记录。_");
+    lines.push("");
+    return;
+  }
+  messages.forEach((message, index) => {
+    const role = message.role === "assistant" ? "AI" : "用户";
+    lines.push(`### ${index + 1}. ${role} · ${formatDate(message.created_at)}`);
+    lines.push("");
+    lines.push(mdText(message.content || ""));
+    lines.push("");
+  });
+}
+
+function markdownValue(value, depth = 0) {
+  if (!hasMarkdownValue(value)) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return mdText(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => markdownListItem(item, depth)).join("\n");
+  }
+  return Object.entries(value)
+    .filter(([, itemValue]) => hasMarkdownValue(itemValue))
+    .map(([key, itemValue]) => {
+      if (typeof itemValue === "object" && itemValue !== null) {
+        return `- **${mdText(reportFieldLabel(key).replace(/：$/, ""))}**：\n${indentMarkdown(markdownValue(itemValue, depth + 1), 2)}`;
+      }
+      return `- **${mdText(reportFieldLabel(key).replace(/：$/, ""))}**：${mdText(itemValue)}`;
+    })
+    .join("\n");
+}
+
+function markdownListItem(item, depth = 0) {
+  if (typeof item === "object" && item !== null) {
+    const content = markdownValue(item, depth + 1);
+    return `- ${content.startsWith("- ") ? `\n${indentMarkdown(content, 2)}` : content}`;
+  }
+  return `- ${mdText(item)}`;
+}
+
+function indentMarkdown(text, spaces) {
+  const pad = " ".repeat(spaces);
+  return String(text)
+    .split("\n")
+    .map((line) => (line ? `${pad}${line}` : line))
+    .join("\n");
+}
+
+function hasMarkdownValue(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some((item) => hasMarkdownValue(item));
+  if (typeof value === "object") return Object.values(value).some((item) => hasMarkdownValue(item));
+  return true;
+}
+
+function mdText(value) {
+  return String(value ?? "").replace(/\r\n/g, "\n").trim();
+}
+
+function advisorMarkdownFilename() {
+  const name = sanitizeFilename(currentSession.session?.client_name || "客户");
+  const date = new Date().toISOString().slice(0, 10);
+  return `${name}-能力资产诊断工作底稿-${date}.md`;
+}
+
+function sanitizeFilename(value) {
+  return String(value || "客户")
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, "")
+    .slice(0, 40) || "客户";
 }
 
 function renderMaterialDecision() {
@@ -884,9 +1091,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   el("apiKeyForm").addEventListener("submit", saveApiKey);
   el("uploadForm").addEventListener("submit", uploadMaterials);
   el("messageForm").addEventListener("submit", submitMessage);
-  el("organizeBtn").addEventListener("click", organizeMaterials);
-  el("askBtn").addEventListener("click", askNext);
-  el("reportBtn").addEventListener("click", generateReport);
+  el("organizeBtn")?.addEventListener("click", organizeMaterials);
+  el("askBtn")?.addEventListener("click", askNext);
+  el("reportBtn")?.addEventListener("click", generateReport);
+  el("downloadMarkdownBtn")?.addEventListener("click", downloadAdvisorMarkdown);
   el("manualPromptBtn").addEventListener("click", generateManualPrompt);
   el("copyManualPromptBtn").addEventListener("click", copyManualPrompt);
   el("importManualOutputBtn").addEventListener("click", importManualOutput);
