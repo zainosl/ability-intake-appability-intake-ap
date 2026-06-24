@@ -234,6 +234,53 @@ async function loadSessions() {
   });
 }
 
+async function loadDeliverableSubmissions() {
+  const list = el("deliverableSubmissionsList");
+  if (!list) return;
+  list.textContent = "正在检查提交结果...";
+  try {
+    const data = await api("/api/deliverable-submissions?deliverable_id=zhanglu-business-preference-constraints&limit=5");
+    const submissions = data.submissions || [];
+    if (!submissions.length) {
+      list.textContent = "还没有收到用户提交。用户填写后需要点击“提交保存给顾问”。";
+      return;
+    }
+    list.innerHTML = submissions.map((item, index) => `
+      <article class="deliverable-submission-card">
+        <strong>${escapeHtml(item.client_name || "未命名用户")} · ${escapeHtml(item.title || "商业方向偏好与约束表")}</strong>
+        <span>${index === 0 ? "最新提交 · " : ""}${formatDate(item.created_at)} · 提交 ID ${item.id}</span>
+        <pre>${escapeHtml(markdownPreview(item.markdown))}</pre>
+        <div class="deliverable-submission-actions">
+          <button type="button" data-copy-submission="${item.id}">复制完整 Markdown</button>
+        </div>
+      </article>
+    `).join("");
+    list.querySelectorAll("[data-copy-submission]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = submissions.find((submission) => String(submission.id) === button.dataset.copySubmission);
+        if (item) copySubmissionMarkdown(item.markdown || "");
+      });
+    });
+  } catch (err) {
+    list.textContent = `读取提交结果失败：${err.message}`;
+  }
+}
+
+function markdownPreview(markdown) {
+  const text = String(markdown || "").trim();
+  if (!text) return "提交内容为空。";
+  return text.length > 1200 ? `${text.slice(0, 1200)}\n\n...` : text;
+}
+
+async function copySubmissionMarkdown(markdown) {
+  try {
+    await navigator.clipboard.writeText(markdown);
+    showFeedback("提交结果 Markdown 已复制。", "success");
+  } catch (_) {
+    showFeedback("浏览器没有开放自动复制权限，请在卡片中手动选择复制。", "info");
+  }
+}
+
 async function selectSession(id) {
   currentSessionId = id;
   currentSession = await api(`/api/sessions/${id}`);
@@ -1104,6 +1151,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   el("copyMaterialRequestBtn").addEventListener("click", copyMaterialRequest);
   el("copyClientLinkFromDecisionBtn").addEventListener("click", copyClientLink);
   el("openClientLinkFromDecisionBtn").addEventListener("click", openClientLink);
+  el("refreshDeliverableSubmissionsBtn")?.addEventListener("click", loadDeliverableSubmissions);
   el("newSessionBtn").addEventListener("click", clearCurrent);
   updateManualTaskHint();
   const canLoad = await loadAuthStatus();
@@ -1114,4 +1162,5 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function initAdvisorWorkspace() {
   await loadHealth();
   await loadSessions();
+  await loadDeliverableSubmissions();
 }

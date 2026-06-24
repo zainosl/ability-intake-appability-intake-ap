@@ -430,6 +430,73 @@ button:disabled {
   color: var(--green);
 }
 
+.deliverable-submissions {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.deliverable-submissions-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.deliverable-submissions-head h3 {
+  margin: 4px 0 0;
+  font-size: 17px;
+}
+
+.deliverable-submissions-list {
+  display: grid;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.deliverable-submission-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.deliverable-submission-card strong {
+  display: block;
+  color: var(--ink);
+}
+
+.deliverable-submission-card span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.deliverable-submission-card pre {
+  max-height: 220px;
+  margin: 12px 0 0;
+  padding: 12px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.deliverable-submission-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .topbar h2 {
   margin: 3px 0 0;
   font-size: 28px;
@@ -1710,6 +1777,23 @@ label,
   border-color: rgba(88, 225, 193, 0.42);
   background: rgba(88, 225, 193, 0.1);
   color: var(--green);
+}
+
+.deliverable-submissions {
+  background: rgba(17, 20, 24, 0.86);
+  border-color: var(--line);
+  border-radius: 6px;
+}
+
+.deliverable-submission-card {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--line);
+}
+
+.deliverable-submission-card pre {
+  background: rgba(6, 8, 10, 0.58);
+  border-color: var(--line);
+  color: var(--ink);
 }
 
 .session-card:hover,

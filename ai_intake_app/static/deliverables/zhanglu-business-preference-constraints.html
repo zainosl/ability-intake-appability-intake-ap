@@ -738,7 +738,7 @@
           <button class="btn" id="copyBtn" type="button">复制结果</button>
           <button class="btn" id="resetBtn" type="button">清空</button>
         </div>
-        <p class="save-status" id="saveStatus">草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
+        <p class="save-status" data-save-status>草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </header>
       <div id="formRoot"></div>
     </section>
@@ -761,6 +761,7 @@
           <button class="btn primary" id="downloadResultBtn" type="button">下载结果</button>
           <button class="btn" id="copyResultBtn" type="button">复制结果</button>
         </div>
+        <p class="save-status" data-save-status>草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </div>
     </section>
   </main>
@@ -1257,14 +1258,17 @@
     }
 
     function setSaveStatus(text, type = "") {
-      const node = document.getElementById("saveStatus");
-      node.textContent = text;
-      node.className = `save-status ${type}`.trim();
+      document.querySelectorAll("[data-save-status]").forEach(node => {
+        node.textContent = text;
+        node.className = `save-status ${type}`.trim();
+      });
     }
 
     function setSubmitBusy(isBusy) {
-      document.getElementById("submitBtn").disabled = isBusy;
-      document.getElementById("submitResultBtn").disabled = isBusy;
+      [document.getElementById("submitBtn"), document.getElementById("submitResultBtn")].forEach(button => {
+        button.disabled = isBusy;
+        button.textContent = isBusy ? "正在提交..." : "提交保存给顾问";
+      });
     }
 
     async function submitToAdvisor() {
@@ -1286,12 +1290,18 @@
         if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
         const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
         setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
+        [document.getElementById("submitBtn"), document.getElementById("submitResultBtn")].forEach(button => {
+          button.textContent = "已保存给顾问";
+        });
+        setTimeout(() => setSubmitBusy(false), 1800);
         showToast("已提交保存给顾问");
       } catch (error) {
         setSaveStatus(`提交失败：${error.message}。请先下载或复制结果，避免丢失。`, "error");
         showToast("提交失败，请下载备份");
       } finally {
-        setSubmitBusy(false);
+        if (document.getElementById("submitBtn").textContent !== "已保存给顾问") {
+          setSubmitBusy(false);
+        }
       }
     }
 
