@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>张麓 - 商业方向偏好与约束表</title>
+  <style>
+    :root {
+      --bg: #0B0D0F;
+      --bg2: #13161A;
+      --bg3: #1C2026;
+      --paper: rgba(19, 22, 26, 0.94);
+      --panel: rgba(28, 32, 38, 0.86);
+      --ink: #F7F8FA;
+      --muted: #A9B0BA;
+      --dim: #68717D;
+      --line: rgba(255, 255, 255, 0.07);
+      --line-strong: rgba(255, 255, 255, 0.14);
+      --accent: #58E1C1;
+      --accent-2: #3BB89A;
+      --accent-3: #F6B66B;
+      --soft: rgba(88, 225, 193, 0.08);
+      --ok: rgba(88, 225, 193, 0.11);
+      --warn: rgba(246, 182, 107, 0.10);
+      --shadow: 0 30px 100px rgba(0, 0, 0, 0.34);
+      --radius: 2px;
+      --font-sans: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-family: var(--font-sans);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(rgba(88, 225, 193, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(88, 225, 193, 0.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 60px 60px, 60px 60px, auto;
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.72;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(11, 13, 15, 0.15), rgba(11, 13, 15, 0.96));
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .side-nav {
+      position: fixed;
+      left: 24px;
+      top: 28px;
+      bottom: 28px;
+      width: 210px;
+      padding: 18px;
+      background: rgba(19, 22, 26, 0.82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: auto;
+      z-index: 4;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22);
+    }
+
+    .side-nav-title {
+      margin: 0 0 14px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .side-nav a {
+      display: block;
+      padding: 9px 8px;
+      border-left: 1px solid var(--line-strong);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.35;
+      transition: 160ms ease;
+    }
+
+    .side-nav a:hover {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(88, 225, 193, 0.04);
+    }
+
+    .form-pane {
+      padding: 56px clamp(20px, 5vw, 84px) 76px clamp(250px, 19vw, 300px);
+    }
+
+    .summary-pane {
+      padding: 0 clamp(20px, 5vw, 84px) 84px clamp(250px, 19vw, 300px);
+      background: transparent;
+    }
+
+    header {
+      max-width: 1280px;
+      margin: 0 auto 42px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 14px;
+      padding: 6px 14px;
+      border: 1px solid rgba(88, 225, 193, 0.30);
+      border-radius: var(--radius);
+      background: rgba(88, 225, 193, 0.025);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 880px;
+      font-size: clamp(42px, 6vw, 76px);
+      letter-spacing: -0.035em;
+      line-height: 1.06;
+      font-weight: 900;
+    }
+
+    .intro {
+      margin: 18px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: clamp(17px, 1.5vw, 21px);
+      font-weight: 300;
+      line-height: 1.85;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 900px;
+      margin-top: 34px;
+    }
+
+    .hero-metric {
+      padding: 20px;
+      background: rgba(19, 22, 26, 0.76);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      position: relative;
+    }
+
+    .hero-metric::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+    }
+
+    .hero-metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .hero-metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      background: transparent;
+      color: var(--ink);
+      padding: 14px 22px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: 180ms ease;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .section {
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: clamp(26px, 3.2vw, 42px);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-top: 1px solid rgba(88, 225, 193, 0.16);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 2.4vw, 30px);
+      letter-spacing: 0;
+      line-height: 1.18;
+      font-weight: 800;
+    }
+
+    .section-count {
+      min-width: 78px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+      gap: 28px;
+    }
+
+    .block {
+      min-width: 0;
+      padding: clamp(20px, 2.4vw, 30px);
+      background: rgba(11, 13, 15, 0.62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .block.constraint {
+      background: rgba(246, 182, 107, 0.035);
+    }
+
+    .block-title {
+      margin: 0 0 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .constraint .block-title {
+      color: var(--accent-3);
+    }
+
+    .field {
+      margin: 0 0 24px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .hint {
+      margin: 6px 0 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .constraint-tip {
+      margin: 0 0 18px;
+      padding: 14px 15px;
+      color: var(--ink);
+      background: rgba(246, 182, 107, 0.09);
+      border: 1px solid rgba(246, 182, 107, 0.28);
+      border-left: 2px solid var(--accent-3);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .constraint-tip strong {
+      color: var(--accent-3);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .example-card {
+      margin: 0 0 22px;
+      padding: 16px;
+      background: rgba(88, 225, 193, 0.055);
+      border: 1px solid rgba(88, 225, 193, 0.22);
+      border-left: 2px solid var(--accent);
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    .example-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      min-height: 52px;
+      padding: 14px 15px;
+      background: rgba(19, 22, 26, 0.82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: 160ms ease;
+    }
+
+    .choice:hover {
+      border-color: rgba(88, 225, 193, 0.42);
+      transform: translateY(-1px);
+    }
+
+    .choice:has(input:checked) {
+      background: rgba(88, 225, 193, 0.09);
+      border-color: rgba(88, 225, 193, 0.58);
+      box-shadow: inset 0 0 0 1px rgba(88, 225, 193, 0.12);
+    }
+
+    .choice input {
+      margin-top: 3px;
+      accent-color: var(--accent);
+    }
+
+    .choice span {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #0B0D0F;
+      color: var(--ink);
+      padding: 14px 15px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    textarea::placeholder,
+    input[type="text"]::placeholder {
+      color: var(--dim);
+    }
+
+    textarea {
+      min-height: 116px;
+      resize: vertical;
+    }
+
+    textarea:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 225, 193, 0.08);
+    }
+
+    .rank-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .range-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 14px;
+      background: rgba(19, 22, 26, 0.82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .range-value {
+      min-width: 42px;
+      text-align: center;
+      font-weight: 800;
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: rgba(11, 13, 15, 0.72);
+      border: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .data-table th, .data-table td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .data-table th {
+      background: rgba(88, 225, 193, 0.08);
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .data-table th:last-child, .data-table td:last-child {
+      border-right: 0;
+    }
+
+    .data-table select {
+      min-width: 64px;
+      padding: 10px;
+    }
+
+    .summary-card {
+      max-width: 1280px;
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(26px, 3.2vw, 42px);
+    }
+
+    .summary-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .summary-head h2 {
+      margin: 0;
+      font-size: clamp(28px, 3.2vw, 42px);
+    }
+
+    .progress {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .matrix-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(11, 13, 15, 0.72);
+    }
+
+    .result-matrix {
+      width: 100%;
+      min-width: 1800px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+
+    .result-matrix th,
+    .result-matrix td {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 14px;
+      vertical-align: top;
+    }
+
+    .result-matrix th {
+      width: 92px;
+      background: rgba(88, 225, 193, 0.08);
+      color: var(--accent);
+      text-align: left;
+      font-weight: 900;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+
+    .result-matrix tr:last-child th,
+    .result-matrix tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .result-matrix td:last-child {
+      border-right: 0;
+    }
+
+    .cell-title {
+      display: inline-flex;
+      padding: 3px 7px;
+      background: var(--ok);
+      border: 1px solid rgba(88, 225, 193, 0.22);
+      border-radius: var(--radius);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 1.45;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+    }
+
+    .empty {
+      color: var(--dim);
+    }
+
+    .summary-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 13px;
+      color: var(--bg);
+      background: var(--accent);
+      border-radius: var(--radius);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: 180ms ease;
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .side-nav {
+        position: static;
+        width: auto;
+        margin: 18px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 4px;
+      }
+
+      .side-nav-title {
+        grid-column: 1 / -1;
+      }
+
+      .form-pane,
+      .summary-pane {
+        padding-left: clamp(18px, 5vw, 64px);
+      }
+
+      .summary-pane {
+        border-top: 1px solid var(--line);
+      }
+
+      .split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rank-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 20px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-count {
+        margin-top: 6px;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <nav class="side-nav" aria-label="页面目录">
+      <p class="side-nav-title">目录</p>
+      <a href="#section-boundary">0. 现实边界</a>
+      <a href="#section-direction">1. 商业方向</a>
+      <a href="#section-mission">2. 初心</a>
+      <a href="#section-ability">3. 能力</a>
+      <a href="#section-resource">4. 资源</a>
+      <a href="#section-user">5. 用户</a>
+      <a href="#section-solution">6. 解决方案</a>
+      <a href="#section-income">7. 收入模型</a>
+      <a href="#section-growth">8. 增长渠道</a>
+      <a href="#section-barrier">9. 壁垒</a>
+      <a href="#result">最终结果</a>
+    </nav>
+
+    <section class="form-pane">
+      <header>
+        <p class="eyebrow">第二步 · 商业方向选择与收敛</p>
+        <h1>张麓商业方向偏好与约束表</h1>
+        <p class="intro">先完成选择和填写，最后看底部汇总结果。页面会自动保存，并按三行呈现：类型、偏好、约束。没有想法的约束项可以不填。</p>
+        <div class="hero-grid">
+          <div class="hero-metric">
+            <strong>先选择偏好</strong>
+            <span>preference selection</span>
+          </div>
+          <div class="hero-metric">
+            <strong>再填写约束</strong>
+            <span>constraint input</span>
+          </div>
+          <div class="hero-metric">
+            <strong>最终汇总</strong>
+            <span>type / preference / constraint</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="jumpResultBtn" type="button">查看汇总</button>
+          <button class="btn primary" id="exportBtn" type="button">导出 Markdown</button>
+          <button class="btn" id="copyBtn" type="button">复制结果</button>
+          <button class="btn" id="resetBtn" type="button">清空</button>
+        </div>
+      </header>
+      <div id="formRoot"></div>
+    </section>
+
+    <section class="summary-pane" id="result">
+      <div class="summary-card">
+        <div class="summary-head">
+          <div>
+            <p class="eyebrow">最终结果</p>
+            <h2>类型 / 偏好 / 约束</h2>
+          </div>
+          <div class="progress" id="progressText">0/10 已填写</div>
+        </div>
+        <div class="matrix-wrap">
+          <table class="result-matrix" id="summaryTable" aria-label="实时三行汇总"></table>
+        </div>
+        <p class="summary-note">填写完成后看这里。横向滚动可以查看全部类型，结果会自动保存在本机浏览器里。</p>
+        <div class="summary-actions">
+          <button class="btn primary" id="downloadResultBtn" type="button">下载结果</button>
+          <button class="btn" id="copyResultBtn" type="button">复制结果</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">已更新</div>
+
+  <script>
+    const STORAGE_KEY = "zhanglu-commercial-direction-form-v1";
+
+    const abilityTable = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>能力资产</th>
+            <th>判断</th>
+            <th>证据摘要</th>
+            <th>商业化价值</th>
+            <th>风险</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>重新定义模糊问题</td>
+            <td>核心资产</td>
+            <td>面对人类三角调研、JTBD 用户分层、历史产品方案时，都会先重构问题和边界</td>
+            <td>可用于诊断、咨询、产品方向梳理、转型问题拆解</td>
+            <td>容易分析过深，交付不够轻</td>
+          </tr>
+          <tr>
+            <td>识别真实问题和真实结果</td>
+            <td>核心资产</td>
+            <td>会判断“20个产品”背后是否有真实商业结果；会反推收入、产能、行业 benchmark</td>
+            <td>可用于伪需求、伪增长、伪定位、伪成果校准</td>
+            <td>判断锋利，可能让对方感到被否定</td>
+          </tr>
+          <tr>
+            <td>方法论组合与改造</td>
+            <td>核心资产，但不是原创型</td>
+            <td>张麓自评更擅长“先用后改”，而非从 0 到 1 原创方法论</td>
+            <td>可用于把复杂问题步骤化、模板化、知识库化</td>
+            <td>若包装成原创方法论专家，证据不足</td>
+          </tr>
+          <tr>
+            <td>AI 推演与校准能力</td>
+            <td>核心资产</td>
+            <td>近期刻意练习用 AI 构建上下文、推演、校准、搭工作流；历史上也理解 AI 产品边界</td>
+            <td>可用于 AI 协作、AI 知识库、AI 工作流、AI 产品化</td>
+            <td>能否教会别人、迁移到他人问题仍待验证</td>
+          </tr>
+          <tr>
+            <td>重方案压成轻验证</td>
+            <td>核心资产，但段位需提升</td>
+            <td>有意识把大方案压成低成本验证；但本人承认“最小验证单元找得不够准”</td>
+            <td>可用于商业模式验证、产品 MVP、行动计划设计</td>
+            <td>容易过度设计，验证动作不够小</td>
+          </tr>
+        </tbody>
+      </table>`;
+
+    const sections = [
+      {
+        id: "boundary",
+        title: "0. 现实边界",
+        pref: [
+          { kind: "radio", key: "time", label: "每周可投入的净时间", options: ["3 小时以内", "3-5 小时", "5-10 小时", "10-20 小时", "20 小时以上"] },
+          { kind: "check", key: "pace", label: "你更希望的推进节奏", options: ["低压力试水", "每周稳定推进", "短期集中冲刺", "当成主线项目推进", "先小验证，不急着做完整产品"] }
+        ],
+        cons: [
+          { kind: "textarea", key: "protect", label: "哪些东西不能被商业探索影响？没有需要保护的可以不填。", placeholder: "例如：原来的主业工作、原来的副业工作、投资、健康、休息、家庭、学习、情绪稳定、当前现金流安排。" },
+          { kind: "textarea", key: "unacceptable", label: "你现在最不能接受的状态是什么？没有可以不填。", placeholder: "1. \n2. \n3. " }
+        ]
+      },
+      {
+        id: "direction",
+        title: "1. 商业方向",
+        pref: [
+          { kind: "check", key: "tracks", label: "你有兴趣的大赛道", options: ["健康", "幸福", "关系", "亲子", "教育", "财富", "其他"] },
+          { kind: "rank", key: "tracksRank", label: "大赛道前三排序" },
+          { kind: "check", key: "type", label: "你更有感觉的商业类型", options: ["线上", "线下", "实体产品", "虚拟服务"] },
+          { kind: "rank", key: "typeRank", label: "商业类型前三排序" },
+          { kind: "radio", key: "stage", label: "你希望未来大概走到哪个收入阶段", options: ["副业：1 个人，年营收 6 万，亏损几万", "全职个体：1 个人，年营收 10-30 万，亏损几十万", "工作室：5-20 人，年营收 300 万以内，亏损 100-200 万", "小规模公司：20-100 人，年营收 1000 万以内，亏损 300-500 万", "体系增长：100-300 人，年营收 5000 万以内，亏损 1000 万+", "细分头部：300 人以上，年营收 1 个亿，亏损 5000 万+", "做大上市：1000 人以上，年营收 5 个亿，亏损亿+"] },
+          { kind: "range", key: "concentration", label: "竞争集中度偏好", min: 0, max: 10, hint: "0 = 散点多元；10 = 一家通吃" }
+        ],
+        cons: [
+          { kind: "textarea", key: "avoidDirection", label: "你明确不想进入的商业方向/类型。没有想法可以不写。", placeholder: "1. \n2. \n3. " },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，你可能不适合一开始就做大而重、强组织管理、强融资、强规模化的商业模式。如果你认同，可以写进上面的约束里。" }
+        ]
+      },
+      {
+        id: "mission",
+        title: "2. 初心",
+        pref: [
+          { kind: "example", title: "Example", text: "我是成就型，我希望能够帮助影响很多人。\n\n方式：\n我会通过提升全人类的思维水平，并且是基于商业成功的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得成就感、出名感。\n\n理想生活：\n在实现以后，我可以享受自由且健康的生活，有能力照顾我关心的人，和伴侣朋友开心地生活。" },
+          { kind: "textarea", key: "mission", label: "使命、愿景或长期想做的事。没有可以写“暂时没有”。", placeholder: "我是____型的人，我希望能够帮助/影响____。\n\n方式：\n我会通过____，并且基于____的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得____。\n\n理想生活：\n在实现以后，我可以____。" },
+          { kind: "textarea", key: "benchmarks", label: "如果你自己有对标人物或对标作品，可以写在这里。没有可以不写。", placeholder: "1. \n2. \n3. " }
+        ],
+        cons: [
+          { kind: "textarea", key: "missionAvoid", label: "哪些事即使赚钱，也不符合你的初心？没有可以不填。", placeholder: "例如：夸张包装、情绪操控、制造焦虑、短期割韭菜、过度迎合流量、牺牲长期信任、牺牲健康、牺牲自由、牺牲独立判断。" }
+        ]
+      },
+      {
+        id: "ability",
+        title: "3. 能力",
+        intro: abilityTable,
+        pref: [
+          { kind: "check", key: "abilityUse", label: "你希望未来商业方向主要使用哪些能力", options: ["重新定义模糊问题", "识别真实问题和真实结果", "方法论组合与改造", "AI 推演与校准能力", "重方案压成轻验证"] }
+        ],
+        cons: [
+          { kind: "textarea", key: "abilityNoSell", label: "哪些能力你不想作为商业化主卖点？没有可以不填。", placeholder: "1. \n2. \n3. " },
+          { kind: "textarea", key: "abilityDrain", label: "哪些能力虽然你有，但用起来会很消耗？没有可以不填。", placeholder: "" },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，历史职场项目更适合作为背书，不一定适合直接作为商业内核；“方法论组合与改造”也不宜包装成原创方法论能力。" }
+        ]
+      },
+      {
+        id: "resource",
+        title: "4. 资源",
+        pref: [
+          { kind: "resource", key: "resources", label: "你现在愿意用于商业化的资源" },
+          { kind: "textarea", key: "resourceTop", label: "你最愿意优先使用的资源，排前三", placeholder: "1. \n2. \n3. " }
+        ],
+        cons: [
+          { kind: "textarea", key: "resourceAvoid", label: "哪些资源不想动用，或需要谨慎使用？没有可以不填。", placeholder: "1. \n2. \n3. " }
+        ]
+      },
+      {
+        id: "user",
+        title: "5. 用户",
+        pref: [
+          { kind: "check", key: "bc", label: "你更想服务 B 端还是 C 端", options: ["B 端", "C 端", "B 端和 C 端都可以，先看具体问题"] },
+          { kind: "check", key: "bType", label: "如果是 B 端，你更想服务哪类客户", options: ["小 B：个体创业者/工作室/小团队", "中小企业客户", "大企业客户", "已经有业务但方向混乱的团队", "做 AI/产品/知识服务的团队", "其他"] },
+          { kind: "check", key: "cType", label: "如果是 C 端，你更想服务什么水平的用户", options: ["小白用户", "有一定认知但混乱的人", "高认知用户", "正在转型的人", "已经有业务的人", "愿意被诊断和挑战的人", "其他"] },
+          { kind: "rank", key: "userRank", label: "你最想服务的用户前三类" }
+        ],
+        cons: [
+          { kind: "textarea", key: "userAvoid", label: "你不想服务哪类用户？没有可以不填。", placeholder: "例如：完全小白、执行力弱、强情绪需求、只想要鼓励不想被校准、不愿付费、付费后强控制、需要长期陪伴、只想找捷径、反复拉扯、大企业复杂流程客户。" },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，如果用户完全不愿被挑战、只想被鼓励，可能不适合你，因为“识别真实问题和真实结果”能力会让对方感到被否定。" }
+        ]
+      },
+      {
+        id: "solution",
+        title: "6. 解决方案",
+        pref: [
+          { kind: "ratings", key: "solutionRatings", label: "你更愿意用什么形式解决用户问题？5 = 很想做，1 = 很不想做。", rows: [
+            ["咨询", "中", "低", "追求单次成就"],
+            ["陪跑", "高", "低", "追求深度关系"],
+            ["社群", "低", "中", "追求互动氛围"],
+            ["课程", "中", "中", "追求科学求真"],
+            ["硬件", "低", "高", "追求影响现实"],
+            ["书籍", "中", "高", "追求产品留存"],
+            ["软件", "低", "极高", "追求覆盖规模"]
+          ] },
+          { kind: "rank", key: "solutionRank", label: "最想优先尝试的前三种形式" }
+        ],
+        cons: [
+          { kind: "textarea", key: "solutionAvoid", label: "哪些形式你明显不想做，或短期能测但不想长期做？没有可以不填。", placeholder: "1. \n2. \n3. " },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，你可能不适合高情绪价值社群运营，也不适合无限重交付。" }
+        ]
+      },
+      {
+        id: "income",
+        title: "7. 收入模型",
+        pref: [
+          { kind: "radio", key: "firstOrder", label: "你希望多久拿到第一单", options: ["1 周内", "2 周内", "1 个月内", "3 个月内", "半年内", "不急，先找准方向"] },
+          { kind: "radio", key: "stable", label: "你希望多久相对稳定", options: ["1 个月", "3 个月", "6 个月", "1 年", "2 年以上", "不确定"] },
+          { kind: "check", key: "incomeModel", label: "你更偏好的收入模型", options: ["单次咨询收费", "诊断报告收费", "项目制收费", "陪跑月费", "社群会员费", "课程收费", "模板/工具包收费", "软件订阅", "企业顾问费", "结果分成", "其他"] },
+          { kind: "rank", key: "incomeRank", label: "收入模型前三排序" },
+          { kind: "radio", key: "price", label: "第一次收费能接受的价格区间", options: ["免费换案例", "99-199", "199-699", "699-1999", "1999-4999", "5000 以上", "不确定"] }
+        ],
+        cons: [
+          { kind: "textarea", key: "incomeAvoid", label: "你不想采用的收入模型。没有可以不填。", placeholder: "1. \n2. \n3. " },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，如果某个收入模型要求持续强销售、强结果承诺或长期高压交付，需要谨慎选择。" }
+        ]
+      },
+      {
+        id: "growth",
+        title: "8. 增长渠道",
+        pref: [
+          { kind: "check", key: "seedSource", label: "第一批种子用户可能从哪里来", options: ["熟人转介绍", "一堂同学", "AI 大航海同学", "深圳线下学习中心", "原职场同事", "投资圈朋友", "产品经理群体", "创业者朋友", "做 AI/知识库/内容的人", "微信朋友圈", "社群发帖招募", "线下分享", "公开长文", "小红书/短视频", "其他"] },
+          { kind: "rank", key: "seedRank", label: "种子用户来源前三排序" },
+          { kind: "check", key: "acquireMethod", label: "你能接受的获取方式", options: ["私聊邀请", "朋友圈发布", "社群招募", "朋友转介绍", "线下活动认识", "写案例吸引", "公开招募体验用户", "免费诊断换反馈", "低价试单", "其他"] }
+        ],
+        cons: [
+          { kind: "textarea", key: "growthAvoid", label: "你不能接受或明显抗拒的获客方式。没有可以不填。", placeholder: "1. \n2. \n3. " },
+          { kind: "note", text: "从之前的沟通交流和能力挖掘来看，如果某个获客方式高度依赖感性表达、持续公开曝光或强销售，需要考虑它是否会放大表达和销售负债。" }
+        ]
+      },
+      {
+        id: "barrier",
+        title: "9. 壁垒",
+        pref: [
+          { kind: "radio", key: "barrierHope", label: "你是否希望未来方向能形成门槛和壁垒", options: ["非常希望", "希望，但不是第一阶段重点", "无所谓，先赚钱", "不希望太重，保持灵活", "不确定"] },
+          { kind: "textarea", key: "barrierNote", label: "先不用选择具体壁垒类型，只写一下你是否希望这个方向未来能沉淀出门槛。", placeholder: "" }
+        ],
+        cons: [
+          { kind: "textarea", key: "barrierCost", label: "你不想为了壁垒付出什么代价？没有可以不填。", placeholder: "1. \n2. \n3. " }
+        ]
+      }
+    ];
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function inputName(sectionId, key) {
+      return `${sectionId}__${key}`;
+    }
+
+    function valueFor(sectionId, key, fallback) {
+      return state[inputName(sectionId, key)] ?? fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function makeChoice(section, field, option, type) {
+      const name = inputName(section.id, field.key);
+      const current = valueFor(section.id, field.key, type === "checkbox" ? [] : "");
+      const checked = type === "checkbox" ? current.includes(option) : current === option;
+      return `
+        <label class="choice">
+          <input type="${type}" name="${name}" value="${escapeHtml(option)}" ${checked ? "checked" : ""}>
+          <span>${escapeHtml(option)}</span>
+        </label>`;
+    }
+
+    function renderField(section, field) {
+      const name = inputName(section.id, field.key);
+
+      if (field.kind === "note") {
+        return `<p class="constraint-tip"><strong>约束提示</strong>${escapeHtml(field.text)}</p>`;
+      }
+
+      if (field.kind === "example") {
+        return `<div class="example-card"><strong>${escapeHtml(field.title || "Example")}</strong>${escapeHtml(field.text)}</div>`;
+      }
+
+      if (field.kind === "check" || field.kind === "radio") {
+        const type = field.kind === "check" ? "checkbox" : "radio";
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            ${field.hint ? `<p class="hint">${escapeHtml(field.hint)}</p>` : ""}
+            <div class="choice-grid">${field.options.map(option => makeChoice(section, field, option, type)).join("")}</div>
+          </div>`;
+      }
+
+      if (field.kind === "textarea") {
+        return `
+          <label class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            <textarea name="${name}" placeholder="${escapeHtml(field.placeholder || "")}">${escapeHtml(valueFor(section.id, field.key, ""))}</textarea>
+          </label>`;
+      }
+
+      if (field.kind === "rank") {
+        const values = valueFor(section.id, field.key, ["", "", ""]);
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            <div class="rank-grid">
+              ${[0, 1, 2].map(index => `<input type="text" name="${name}" data-rank="${index}" placeholder="${index + 1}." value="${escapeHtml(values[index] || "")}">`).join("")}
+            </div>
+          </div>`;
+      }
+
+      if (field.kind === "range") {
+        const current = valueFor(section.id, field.key, Math.round((field.max - field.min) / 2));
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            ${field.hint ? `<p class="hint">${escapeHtml(field.hint)}</p>` : ""}
+            <div class="range-wrap">
+              <input type="range" name="${name}" min="${field.min}" max="${field.max}" value="${current}">
+              <span class="range-value" data-range-value="${name}">${current}/10</span>
+            </div>
+          </div>`;
+      }
+
+      if (field.kind === "resource") {
+        const rows = ["人脉资源", "团队资源", "认知资源", "商业资源", "资产资源", "声誉资源", "证书/知识产权资源"];
+        const current = valueFor(section.id, field.key, {});
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            <table class="data-table">
+              <thead><tr><th>资源类型</th><th>你已有且愿意使用的资源</th></tr></thead>
+              <tbody>
+                ${rows.map(row => `
+                  <tr>
+                    <td>${escapeHtml(row)}</td>
+                    <td><input type="text" name="${name}" data-resource="${escapeHtml(row)}" value="${escapeHtml(current[row] || "")}"></td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>`;
+      }
+
+      if (field.kind === "ratings") {
+        const current = valueFor(section.id, field.key, {});
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            <table class="data-table">
+              <thead><tr><th>形式</th><th>影响深度</th><th>影响广度</th><th>追求目标</th><th>想做程度</th></tr></thead>
+              <tbody>
+                ${field.rows.map(row => `
+                  <tr>
+                    <td>${escapeHtml(row[0])}</td>
+                    <td>${escapeHtml(row[1])}</td>
+                    <td>${escapeHtml(row[2])}</td>
+                    <td>${escapeHtml(row[3])}</td>
+                    <td>
+                      <select name="${name}" data-rating="${escapeHtml(row[0])}">
+                        <option value="">未选</option>
+                        ${[1,2,3,4,5].map(score => `<option value="${score}" ${String(current[row[0]] || "") === String(score) ? "selected" : ""}>${score}</option>`).join("")}
+                      </select>
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>`;
+      }
+
+      return "";
+    }
+
+    function renderSection(section, index) {
+      return `
+        <section class="section" id="section-${section.id}" data-section="${section.id}">
+          <div class="section-head">
+            <h2>${escapeHtml(section.title)}</h2>
+            <div class="section-count" data-count="${section.id}">未填写</div>
+          </div>
+          ${section.intro ? `<div class="field">${section.intro}</div>` : ""}
+          <div class="split">
+            <div class="block">
+              <p class="block-title">偏好</p>
+              ${section.pref.map(field => renderField(section, field)).join("")}
+            </div>
+            <div class="block constraint">
+              <p class="block-title">约束</p>
+              ${section.cons.map(field => renderField(section, field)).join("")}
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function renderForm() {
+      document.getElementById("formRoot").innerHTML = sections.map(renderSection).join("");
+      bindEvents();
+      updateSummary();
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("input, textarea, select").forEach(el => {
+        el.addEventListener("input", onInput);
+        el.addEventListener("change", onInput);
+      });
+    }
+
+    function onInput(event) {
+      const el = event.target;
+      const name = el.name;
+      if (!name) return;
+
+      if (el.type === "checkbox") {
+        const checked = Array.from(document.querySelectorAll(`input[name="${CSS.escape(name)}"]:checked`)).map(item => item.value);
+        state[name] = checked;
+      } else if (el.type === "radio") {
+        state[name] = el.value;
+      } else if (el.dataset.rank !== undefined) {
+        const values = Array.from(document.querySelectorAll(`input[name="${CSS.escape(name)}"][data-rank]`))
+          .sort((a, b) => Number(a.dataset.rank) - Number(b.dataset.rank))
+          .map(item => item.value.trim());
+        state[name] = values;
+      } else if (el.dataset.resource !== undefined) {
+        const values = {};
+        document.querySelectorAll(`input[name="${CSS.escape(name)}"][data-resource]`).forEach(item => {
+          if (item.value.trim()) values[item.dataset.resource] = item.value.trim();
+        });
+        state[name] = values;
+      } else if (el.dataset.rating !== undefined) {
+        const values = {};
+        document.querySelectorAll(`select[name="${CSS.escape(name)}"][data-rating]`).forEach(item => {
+          if (item.value) values[item.dataset.rating] = item.value;
+        });
+        state[name] = values;
+      } else {
+        state[name] = el.value;
+      }
+
+      if (el.type === "range") {
+        const valueNode = document.querySelector(`[data-range-value="${CSS.escape(name)}"]`);
+        if (valueNode) valueNode.textContent = `${el.value}/10`;
+      }
+
+      saveState();
+      updateSummary();
+    }
+
+    function isFilled(value) {
+      if (Array.isArray(value)) return value.some(item => String(item || "").trim());
+      if (value && typeof value === "object") return Object.values(value).some(item => String(item || "").trim());
+      return String(value || "").trim().length > 0;
+    }
+
+    function fieldValue(section, field) {
+      return valueFor(section.id, field.key, field.kind === "check" ? [] : "");
+    }
+
+    function summarizeValue(value, field) {
+      if (!isFilled(value)) return "";
+      if (Array.isArray(value)) {
+        const clean = value.filter(Boolean);
+        return clean.length ? clean.join("；") : "";
+      }
+      if (value && typeof value === "object") {
+        if (field && field.kind === "ratings") {
+          return Object.entries(value)
+            .filter(([, score]) => score)
+            .sort((a, b) => Number(b[1]) - Number(a[1]))
+            .map(([name, score]) => `${name} ${score}分`)
+            .join("；");
+        }
+        return Object.entries(value)
+          .filter(([, text]) => String(text || "").trim())
+          .map(([name, text]) => `${name}：${text}`)
+          .join("；");
+      }
+      return String(value).trim().replace(/\n+/g, "；");
+    }
+
+    function summarizeFields(section, fields) {
+      return fields
+        .filter(field => field.kind !== "note" && field.kind !== "example")
+        .map(field => {
+          const text = summarizeValue(fieldValue(section, field), field);
+          return text ? `${field.label.replace(/。.*$/, "").replace(/？.*$/, "")}：${text}` : "";
+        })
+        .filter(Boolean)
+        .join("<br>");
+    }
+
+    function sectionCompletion(section) {
+      const allFields = [...section.pref, ...section.cons].filter(field => field.kind !== "note" && field.kind !== "example");
+      const filled = allFields.filter(field => isFilled(fieldValue(section, field))).length;
+      return { filled, total: allFields.length };
+    }
+
+    function updateSummary() {
+      const rows = ["类型", "偏好", "约束"];
+      const table = document.getElementById("summaryTable");
+      const typeCells = sections.map(section => `<td><span class="cell-title">${escapeHtml(section.title.replace(/^[0-9]+\\.\\s*/, ""))}</span></td>`).join("");
+      const prefCells = sections.map(section => `<td>${summarizeFields(section, section.pref) || '<span class="empty">未填写</span>'}</td>`).join("");
+      const consCells = sections.map(section => `<td>${summarizeFields(section, section.cons) || '<span class="empty">未填写</span>'}</td>`).join("");
+
+      table.innerHTML = `
+        <tbody>
+          <tr><th>${rows[0]}</th>${typeCells}</tr>
+          <tr><th>${rows[1]}</th>${prefCells}</tr>
+          <tr><th>${rows[2]}</th>${consCells}</tr>
+        </tbody>`;
+
+      let completed = 0;
+      sections.forEach(section => {
+        const { filled, total } = sectionCompletion(section);
+        if (filled > 0) completed += 1;
+        const node = document.querySelector(`[data-count="${section.id}"]`);
+        if (node) node.textContent = `${filled}/${total} 已填`;
+      });
+      document.getElementById("progressText").textContent = `${completed}/${sections.length} 类已填写`;
+    }
+
+    function buildMarkdown() {
+      const header = `# 张麓 - 商业方向偏好与约束结果\n\n| 类型 | ${sections.map(section => section.title.replace(/^[0-9]+\\.\\s*/, "")).join(" | ")} |\n|---|${sections.map(() => "---").join("|")}|\n`;
+      const pref = `| 偏好 | ${sections.map(section => plain(summarizeFields(section, section.pref))).join(" | ")} |\n`;
+      const cons = `| 约束 | ${sections.map(section => plain(summarizeFields(section, section.cons))).join(" | ")} |\n`;
+      return header + pref + cons;
+    }
+
+    function plain(html) {
+      return (html || "未填写")
+        .replace(/<br>/g, "；")
+        .replace(/<[^>]*>/g, "")
+        .replace(/\|/g, "｜")
+        .trim() || "未填写";
+    }
+
+    function downloadMarkdown() {
+      const blob = new Blob([buildMarkdown()], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "张麓-商业方向偏好与约束结果.md";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("已导出 Markdown");
+    }
+
+    async function copyMarkdown() {
+      const text = buildMarkdown();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          fallbackCopy(text);
+        }
+        showToast("结果已复制");
+      } catch {
+        fallbackCopy(text);
+        showToast("结果已复制");
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+
+    function resetForm() {
+      if (!confirm("确认清空当前填写内容？")) return;
+      state = {};
+      localStorage.removeItem(STORAGE_KEY);
+      renderForm();
+      showToast("已清空");
+    }
+
+    let toastTimer;
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    document.getElementById("exportBtn").addEventListener("click", downloadMarkdown);
+    document.getElementById("copyBtn").addEventListener("click", copyMarkdown);
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+    document.getElementById("downloadResultBtn").addEventListener("click", downloadMarkdown);
+    document.getElementById("copyResultBtn").addEventListener("click", copyMarkdown);
+    document.getElementById("jumpResultBtn").addEventListener("click", () => {
+      document.getElementById("result").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    renderForm();
+  </script>
+</body>
+</html>

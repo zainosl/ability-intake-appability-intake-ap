@@ -386,6 +386,50 @@ button:disabled {
   margin-bottom: 22px;
 }
 
+.deliverable-strip {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.deliverable-strip h3 {
+  margin: 4px 0 0;
+  font-size: 17px;
+}
+
+.deliverable-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.deliverable-links a {
+  min-height: 38px;
+  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.deliverable-links a:hover {
+  border-color: rgba(47, 143, 91, 0.42);
+  color: var(--green);
+}
+
 .topbar h2 {
   margin: 3px 0 0;
   font-size: 28px;
@@ -1648,6 +1692,24 @@ label,
 
 .panel-head {
   background: rgba(255, 255, 255, 0.018);
+}
+
+.deliverable-strip {
+  background: rgba(17, 20, 24, 0.86);
+  border-color: var(--line);
+  border-radius: 6px;
+}
+
+.deliverable-links a {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.deliverable-links a:hover {
+  border-color: rgba(88, 225, 193, 0.42);
+  background: rgba(88, 225, 193, 0.1);
+  color: var(--green);
 }
 
 .session-card:hover,

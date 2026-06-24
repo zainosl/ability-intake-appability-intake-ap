@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>张麓：第一步能力资产诊断可视化交付版</title>
+  <style>
+    :root {
+      --bg: #0B0D0F;
+      --panel: rgba(18, 22, 27, .92);
+      --panel-2: rgba(27, 32, 39, .88);
+      --ink: #F7F8FA;
+      --muted: #A7B0BC;
+      --dim: #697382;
+      --line: rgba(255,255,255,.09);
+      --line-strong: rgba(255,255,255,.16);
+      --green: #58E1C1;
+      --green-2: #3BB89A;
+      --green-soft: rgba(88,225,193,.10);
+      --red: #F07178;
+      --red-soft: rgba(240,113,120,.12);
+      --amber: #F6B66B;
+      --amber-soft: rgba(246,182,107,.12);
+      --blue: #7BA7FF;
+      --blue-soft: rgba(123,167,255,.12);
+      --radius: 8px;
+      --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", "Menlo", "Consolas", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.55;
+      background:
+        linear-gradient(rgba(88,225,193,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(88,225,193,.03) 1px, transparent 1px),
+        var(--bg);
+      background-size: 52px 52px;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(11,13,15,.12), rgba(11,13,15,.96));
+      z-index: -1;
+    }
+    .shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(11,13,15,.86);
+      backdrop-filter: blur(18px);
+    }
+    .brand { padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .brand h1 { margin: 0 0 8px; font-size: 21px; line-height: 1.2; }
+    .brand p { margin: 0; color: var(--dim); font-size: 12px; }
+    nav { display: grid; gap: 4px; margin-top: 16px; }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 9px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+    nav a:hover { color: var(--green); background: var(--green-soft); border-color: rgba(88,225,193,.26); }
+    main { max-width: 1320px; width: 100%; padding: 34px clamp(20px, 4vw, 64px) 76px; }
+    section { margin: 18px 0 34px; }
+    .hero {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(88,225,193,.12), rgba(27,32,39,.82) 46%, rgba(11,13,15,.88));
+      box-shadow: 0 26px 80px rgba(0,0,0,.32);
+    }
+    .eyebrow { color: var(--green); font-family: var(--mono); font-size: 12px; letter-spacing: 0; }
+    h1 { margin: 8px 0 12px; font-size: clamp(34px, 5vw, 62px); line-height: 1.05; }
+    h2 { margin: 0 0 14px; font-size: clamp(24px, 3vw, 34px); line-height: 1.15; }
+    h3 { margin: 0 0 10px; font-size: 18px; line-height: 1.3; }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    .hero-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; align-items: stretch; }
+    .hero-statement {
+      margin-top: 18px;
+      padding: 18px;
+      border-left: 4px solid var(--green);
+      background: rgba(11,13,15,.46);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 19px;
+      font-weight: 800;
+    }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .metric {
+      padding: 14px;
+      min-height: 104px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(11,13,15,.48);
+    }
+    .metric strong { display: block; color: var(--green); font-size: 28px; line-height: 1; }
+    .metric span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .panel.soft { background: var(--panel-2); }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(88,225,193,.32);
+      color: var(--green);
+      background: var(--green-soft);
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .tag.red { color: var(--red); border-color: rgba(240,113,120,.34); background: var(--red-soft); }
+    .tag.amber { color: var(--amber); border-color: rgba(246,182,107,.34); background: var(--amber-soft); }
+    .tag.blue { color: var(--blue); border-color: rgba(123,167,255,.34); background: var(--blue-soft); }
+    .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; margin: 0 0 16px; }
+    .section-head p { max-width: 760px; color: var(--muted); }
+
+    .quadrants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .quad-title { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .quad {
+      display: grid;
+      grid-template-columns: 90px 1fr 1fr;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: rgba(11,13,15,.46);
+    }
+    .cell {
+      min-height: 92px;
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .cell:nth-child(3n) { border-right: 0; }
+    .cell:nth-last-child(-n+3) { border-bottom: 0; }
+    .axis { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--green); background: rgba(88,225,193,.08); font-family: var(--mono); }
+    .hit { position: relative; background: var(--green-soft); box-shadow: inset 0 0 0 2px rgba(88,225,193,.34); color: var(--ink); }
+    .hit::after {
+      content: "张麓";
+      position: absolute;
+      right: 10px;
+      bottom: 9px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #06110f;
+      font-weight: 900;
+      font-size: 11px;
+    }
+    .cell strong { display: block; margin-bottom: 4px; color: var(--ink); font-size: 13px; }
+
+    .capability-layout { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 18px; align-items: stretch; }
+    .radar-card { display: grid; place-items: center; min-height: 420px; }
+    .radar { width: min(100%, 350px); height: auto; }
+    .cap-list { display: grid; gap: 10px; }
+    .cap-card {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .cap-letter {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(88,225,193,.32);
+      background: var(--green-soft);
+      color: var(--green);
+      font-family: var(--mono);
+      font-weight: 900;
+    }
+    .cap-card h3 { margin-bottom: 4px; }
+    .cap-card p { color: var(--muted); font-size: 13px; }
+    .bars { display: grid; gap: 10px; }
+    .bar-row { display: grid; grid-template-columns: 160px minmax(0, 1fr) 44px; gap: 10px; align-items: center; }
+    .bar-name { color: var(--muted); font-size: 13px; }
+    .bar-track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--blue)); }
+    .bar-score { color: var(--green); font-family: var(--mono); font-size: 12px; text-align: right; }
+
+    .knowledge-map { display: grid; gap: 12px; }
+    .k-row {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .k-layer {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-weight: 900;
+    }
+    .k-assets { display: flex; flex-wrap: wrap; gap: 8px; align-content: center; }
+    .chip {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .balance-visual { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; }
+    .asset-list, .debt-lanes { display: grid; gap: 10px; }
+    .asset-item, .debt-item {
+      padding: 13px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .asset-item { border-color: rgba(88,225,193,.25); background: rgba(88,225,193,.055); }
+    .debt-lane { padding: 13px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(11,13,15,.38); }
+    .lane-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .debt-item { margin: 8px 0; border-color: rgba(240,113,120,.22); background: rgba(240,113,120,.07); }
+    .item-title { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 4px; font-weight: 850; }
+    .item-desc { color: var(--muted); font-size: 13px; }
+
+    .funnel { display: grid; gap: 9px; max-width: 860px; margin: 0 auto; }
+    .funnel-step {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .funnel-step:nth-child(1) { margin-inline: 0; border-color: rgba(88,225,193,.32); }
+    .funnel-step:nth-child(2) { margin-inline: 36px; border-color: rgba(88,225,193,.24); }
+    .funnel-step:nth-child(3) { margin-inline: 72px; border-color: rgba(246,182,107,.26); }
+    .funnel-step:nth-child(4) { margin-inline: 108px; border-color: rgba(246,182,107,.22); }
+    .next-info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .info-box { padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+    .info-box strong { color: var(--green); }
+
+    @media (max-width: 1040px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .hero-grid, .capability-layout, .balance-visual, .quadrants, .grid-2, .grid-3, .next-info { grid-template-columns: 1fr; }
+      .funnel-step { margin-inline: 0 !important; }
+    }
+    @media (max-width: 680px) {
+      main { padding: 18px; }
+      .hero { padding: 20px; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .quad { grid-template-columns: 1fr; }
+      .cell { border-right: 0; }
+      .axis.empty { display: none; }
+      .cap-card { grid-template-columns: 44px minmax(0, 1fr); }
+      .cap-card .tag { grid-column: 2; width: fit-content; }
+      .bar-row, .k-row, .funnel-step { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <h1>可视化交付工作台</h1>
+        <p>张麓 · 第一步能力资产诊断 · 精简图表版</p>
+      </div>
+      <nav>
+        <a href="#overview">总览</a>
+        <a href="#position">能力定位</a>
+        <a href="#capability">能力资产地图</a>
+        <a href="#knowledge">知识体系资产</a>
+        <a href="#balance">资产负债表</a>
+        <a href="#entry">第二步候选切口</a>
+        <a href="#next">进入第二步前</a>
+      </nav>
+    </aside>
+    <main>
+      <section class="hero" id="overview">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">FINAL DELIVERY · VISUAL WORKBENCH</div>
+            <h1>张麓：能力资产诊断可视化交付版</h1>
+            <p class="muted">这版不是把旧报告重排一遍，而是把最终结论压成图表、卡片和优先级看板，用来快速复盘、对齐和进入第二步商业切入口选择。</p>
+            <div class="hero-statement">核心判断：张麓不是能力不够，而是能力资产强、个人归因较清楚、平台依赖不算高，但商业闭环证据还不够充分。</div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><strong>5</strong><span>核心能力簇</span></div>
+            <div class="metric"><strong>4A</strong><span>强核心资产，另有 1 项 A 但段位待提升</span></div>
+            <div class="metric"><strong>P0</strong><span>先处理过度分析、表达、验证精度</span></div>
+            <div class="metric"><strong>3-7</strong><span>第二步生成商业切口假设池</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="position">
+        <div class="section-head">
+          <div>
+            <h2>1. 能力定位：两个象限先定性</h2>
+            <p>根据图表指南，这里用“四象限”回答两个判断问题：能力强不强，商业闭环有没有证据；个人能力能不能带走，是否依赖原平台。</p>
+          </div>
+          <span class="tag">Quadrant</span>
+        </div>
+        <div class="quadrants">
+          <div class="panel">
+            <div class="quad-title"><h3>能力资产强度 × 商业闭环证据</h3><span class="tag amber">高潜待验证</span></div>
+            <div class="quad">
+              <div class="cell axis empty"></div>
+              <div class="cell axis">商业闭环弱</div>
+              <div class="cell axis">商业闭环强</div>
+              <div class="cell axis">能力资产强</div>
+              <div class="cell hit"><strong>高潜待验证区</strong>能力强，但还没有充分证明能持续跑出商业结果。</div>
+              <div class="cell"><strong>优势确认区</strong>能力强，商业结果也已经被验证。</div>
+              <div class="cell axis">能力资产弱</div>
+              <div class="cell"><strong>暂缓区</strong>能力和结果证据都不足。</div>
+              <div class="cell"><strong>结果反推区</strong>有结果，但要反查能力来源。</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="quad-title"><h3>个人归因强度 × 平台依赖强度</h3><span class="tag">独立可迁移</span></div>
+            <div class="quad">
+              <div class="cell axis empty"></div>
+              <div class="cell axis">平台依赖低</div>
+              <div class="cell axis">平台依赖高</div>
+              <div class="cell axis">个人归因强</div>
+              <div class="cell hit"><strong>独立可迁移区</strong>个人贡献清楚，离开原平台后仍有较大概率成立。</div>
+              <div class="cell"><strong>可迁移待验证区</strong>能力强，但要拆平台贡献。</div>
+              <div class="cell axis">个人归因弱</div>
+              <div class="cell"><strong>证据不足区</strong>暂时不能判断。</div>
+              <div class="cell"><strong>平台资产区</strong>结果更多来自平台资源。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="capability">
+        <div class="section-head">
+          <div>
+            <h2>2. 能力资产地图：5 个能力簇</h2>
+            <p>这里用“雷达图 + 条形等级 + 能力卡片”取代大段证据表。雷达图看轮廓，条形图看强弱，卡片看定义和商业化边界。</p>
+          </div>
+          <span class="tag">Radar + Bar</span>
+        </div>
+        <div class="capability-layout">
+          <div class="panel radar-card">
+            <svg class="radar" viewBox="0 0 360 360" role="img" aria-label="张麓能力雷达图">
+              <defs>
+                <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <g transform="translate(180 180)">
+                <polygon points="0,-130 123.6,-40.2 76.4,105.2 -76.4,105.2 -123.6,-40.2" fill="none" stroke="rgba(255,255,255,.11)"/>
+                <polygon points="0,-98 93.2,-30.3 57.6,79.4 -57.6,79.4 -93.2,-30.3" fill="none" stroke="rgba(255,255,255,.09)"/>
+                <polygon points="0,-65 61.8,-20.1 38.2,52.6 -38.2,52.6 -61.8,-20.1" fill="none" stroke="rgba(255,255,255,.08)"/>
+                <line x1="0" y1="0" x2="0" y2="-130" stroke="rgba(255,255,255,.1)"/>
+                <line x1="0" y1="0" x2="123.6" y2="-40.2" stroke="rgba(255,255,255,.1)"/>
+                <line x1="0" y1="0" x2="76.4" y2="105.2" stroke="rgba(255,255,255,.1)"/>
+                <line x1="0" y1="0" x2="-76.4" y2="105.2" stroke="rgba(255,255,255,.1)"/>
+                <line x1="0" y1="0" x2="-123.6" y2="-40.2" stroke="rgba(255,255,255,.1)"/>
+                <polygon points="0,-124 117.4,-38.2 72.6,99.9 -68.8,94.7 -111.2,-36.1" fill="rgba(88,225,193,.20)" stroke="#58E1C1" stroke-width="2" filter="url(#glow)"/>
+                <circle cx="0" cy="-124" r="4" fill="#58E1C1"/>
+                <circle cx="117.4" cy="-38.2" r="4" fill="#58E1C1"/>
+                <circle cx="72.6" cy="99.9" r="4" fill="#58E1C1"/>
+                <circle cx="-68.8" cy="94.7" r="4" fill="#58E1C1"/>
+                <circle cx="-111.2" cy="-36.1" r="4" fill="#58E1C1"/>
+                <text x="0" y="-147" text-anchor="middle" fill="#F7F8FA" font-size="12">问题重定义</text>
+                <text x="142" y="-43" text-anchor="start" fill="#F7F8FA" font-size="12">真实性校准</text>
+                <text x="88" y="125" text-anchor="start" fill="#F7F8FA" font-size="12">方法组合</text>
+                <text x="-88" y="125" text-anchor="end" fill="#F7F8FA" font-size="12">AI 推演</text>
+                <text x="-145" y="-43" text-anchor="end" fill="#F7F8FA" font-size="12">轻验证</text>
+              </g>
+            </svg>
+            <div class="bars">
+              <div class="bar-row"><span class="bar-name">问题重定义</span><span class="bar-track"><span class="bar-fill" style="width:95%"></span></span><span class="bar-score">A</span></div>
+              <div class="bar-row"><span class="bar-name">真实性校准</span><span class="bar-track"><span class="bar-fill" style="width:95%"></span></span><span class="bar-score">A/L</span></div>
+              <div class="bar-row"><span class="bar-name">方法组合改造</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bar-score">A</span></div>
+              <div class="bar-row"><span class="bar-name">AI 推演校准</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bar-score">A</span></div>
+              <div class="bar-row"><span class="bar-name">轻验证设计</span><span class="bar-track"><span class="bar-fill" style="width:82%"></span></span><span class="bar-score">A*</span></div>
+            </div>
+          </div>
+          <div class="cap-list">
+            <div class="cap-card">
+              <div class="cap-letter">A</div>
+              <div><h3>把模糊复杂问题重新定义清楚</h3><p>先重新定义问题，再拆边界、变量和判断标准。熟悉领域里段位较高，陌生领域要靠专家和最佳实践校准。</p></div>
+              <span class="tag">A 核心资产</span>
+            </div>
+            <div class="cap-card">
+              <div class="cap-letter">B</div>
+              <div><h3>识别真实问题和真实结果</h3><p>用背景、产能、交付、市场阶段、benchmark 等做真实性校准。适合诊断，但表达场景敏感。</p></div>
+              <span class="tag amber">A / L</span>
+            </div>
+            <div class="cap-card">
+              <div class="cap-letter">C</div>
+              <div><h3>问题导向的方法论组合、改造和应用</h3><p>不是原创方法论专家，而是把已有方法论组合成当前问题可用工具的人。</p></div>
+              <span class="tag">A 核心资产</span>
+            </div>
+            <div class="cap-card">
+              <div class="cap-letter">D</div>
+              <div><h3>用 AI 做推演、追问和校准</h3><p>不是泛 AI 技术能力，而是人机协作、上下文构建、工作流和知识库沉淀能力。</p></div>
+              <span class="tag">A 核心资产</span>
+            </div>
+            <div class="cap-card">
+              <div class="cap-letter">E</div>
+              <div><h3>把重方案压成轻验证</h3><p>有稳定意识和动作，但“找得不够准”，短期更适合作为诊断后的后半段输出。</p></div>
+              <span class="tag amber">A · 段位待提升</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="knowledge">
+        <div class="section-head">
+          <div>
+            <h2>3. 知识体系资产：从可执行到更底层</h2>
+            <p>根据图表指南，层级结构适合用树图/分层图。这里保留六层知识体系，但把长表格改成分层资产块。</p>
+          </div>
+          <span class="tag">Hierarchy</span>
+        </div>
+        <div class="knowledge-map">
+          <div class="k-row">
+            <div class="k-layer">方法论<br><small>最具体</small></div>
+            <div class="k-assets">
+              <span class="chip">问题重新定义流程</span><span class="chip">OSCAR 调研法</span><span class="chip">JTBD 变量拆解</span><span class="chip">价值萃取四问法</span><span class="chip">AI 追问/质疑/修正</span><span class="chip">低风险验证路径</span>
+            </div>
+          </div>
+          <div class="k-row">
+            <div class="k-layer">思维模型</div>
+            <div class="k-assets">
+              <span class="chip">先定义问题再执行</span><span class="chip">问题锚定优先于方法选择</span><span class="chip">变量边界</span><span class="chip">benchmark 交叉验证</span><span class="chip">保留核心假设后做减法</span>
+            </div>
+          </div>
+          <div class="k-row">
+            <div class="k-layer">元认知</div>
+            <div class="k-assets">
+              <span class="chip">观察自己的分析过程</span><span class="chip">识别何时接受/否定/修正 AI</span><span class="chip">把身份变化和转型迷茫当成分析对象</span>
+            </div>
+          </div>
+          <div class="k-row">
+            <div class="k-layer">证据观</div>
+            <div class="k-assets">
+              <span class="chip">重真实结果</span><span class="chip">重口径</span><span class="chip">重归因</span><span class="chip">重可验证反馈</span><span class="chip">不把 AI 说得通当证据</span>
+            </div>
+          </div>
+          <div class="k-row">
+            <div class="k-layer">人文素养</div>
+            <div class="k-assets">
+              <span class="chip">转型者身份断裂</span><span class="chip">理想主义受挫</span><span class="chip">被诊断者防御感</span><span class="chip">低风险行动需求</span>
+            </div>
+          </div>
+          <div class="k-row">
+            <div class="k-layer">价值观<br><small>最底层</small></div>
+            <div class="k-assets">
+              <span class="chip">真实结果</span><span class="chip">长期主义</span><span class="chip">独立判断</span><span class="chip">自洽表达</span><span class="chip">短期验证服务长期锚点</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="balance">
+        <div class="section-head">
+          <div>
+            <h2>4. 能力资产负债表：左资产，右负债</h2>
+            <p>资产侧回答“什么可以带走并放大”；负债侧按 P0/P1/P2 排序，回答“进入第二步之前先处理什么”。严重度保留，但排序不按严重度。</p>
+          </div>
+          <span class="tag red">Balance Sheet</span>
+        </div>
+        <div class="balance-visual">
+          <div class="panel">
+            <div class="section-head"><h3>资产侧</h3><span class="tag">可带走</span></div>
+            <div class="asset-list">
+              <div class="asset-item"><div class="item-title">问题重定义 <span class="tag">A</span></div><div class="item-desc">诊断、咨询和切口收敛的前置能力。</div></div>
+              <div class="asset-item"><div class="item-title">真实性校准 <span class="tag amber">A/L</span></div><div class="item-desc">能过滤伪需求和包装叙事，但表达场景敏感。</div></div>
+              <div class="asset-item"><div class="item-title">方法论组合改造 <span class="tag">A</span></div><div class="item-desc">把已有方法论转成当前问题可用工具。</div></div>
+              <div class="asset-item"><div class="item-title">AI 推演校准 <span class="tag">A</span></div><div class="item-desc">用 AI 追问、质疑、修正和重构判断。</div></div>
+              <div class="asset-item"><div class="item-title">轻验证设计 <span class="tag amber">A</span></div><div class="item-desc">有稳定意识，但验证动作精度仍需训练。</div></div>
+              <div class="asset-item"><div class="item-title">知识体系与价值观 <span class="tag blue">B</span></div><div class="item-desc">问题定义、真实性过滤、低风险验证、长期方向感。</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-head"><h3>负债侧</h3><span class="tag red">按优先级</span></div>
+            <div class="debt-lanes">
+              <div class="debt-lane">
+                <div class="lane-head"><strong>P0 · 先约束</strong><span class="tag red">进入第二步前</span></div>
+                <div class="debt-item"><div class="item-title">过度分析与服务变重 <span class="tag red">高</span></div><div class="item-desc">用时间盒、交付格式、输出颗粒度约束。</div></div>
+                <div class="debt-item"><div class="item-title">判断锋利与表达压力 <span class="tag red">中高</span></div><div class="item-desc">明确诊断场景，用表达转译降低防御感。</div></div>
+                <div class="debt-item"><div class="item-title">价值表达偏抽象 <span class="tag red">高</span></div><div class="item-desc">需要把“会思考”翻译成“买完得到什么”。</div></div>
+                <div class="debt-item"><div class="item-title">验证动作精度不足 <span class="tag red">中高</span></div><div class="item-desc">避免轻验证被设计重，先做真实复盘。</div></div>
+              </div>
+              <div class="debt-lane">
+                <div class="lane-head"><strong>P1 · 验证中补齐</strong><span class="tag amber">商业闭环</span></div>
+                <div class="debt-item"><div class="item-title">用户定位 / 成交 / 定价 <span class="tag red">高</span></div><div class="item-desc">缺失型负债，从白纸验证，不是纠偏旧路径。</div></div>
+                <div class="debt-item"><div class="item-title">标准化交付 / 结果定义 <span class="tag red">中高</span></div><div class="item-desc">把方法压成可理解、可完成、可验收的服务单元。</div></div>
+                <div class="debt-item"><div class="item-title">外部案例 / 行动闭环 <span class="tag red">高-中</span></div><div class="item-desc">需要真实服务、反馈和复盘证据。</div></div>
+              </div>
+              <div class="debt-lane">
+                <div class="lane-head"><strong>P2 · 用来筛选</strong><span class="tag blue">适配模式</span></div>
+                <div class="debt-item"><div class="item-title">慢思考环境依赖 <span class="tag red">中</span></div><div class="item-desc">更适合文本、AI 对话、异步沉淀和低压力共创。</div></div>
+                <div class="debt-item"><div class="item-title">人群适配变窄 <span class="tag red">中</span></div><div class="item-desc">真实、长期主义、独立判断会天然筛掉一部分用户。</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="entry">
+        <div class="section-head">
+          <div>
+            <h2>5. 第二步候选切口：先进入假设池</h2>
+            <p>根据图表指南，漏斗适合表达阶段收敛。这里不是直接定商业方向，而是把最值得进入第二步的切口按优先级放入假设池。</p>
+          </div>
+          <span class="tag">Funnel</span>
+        </div>
+        <div class="funnel">
+          <div class="funnel-step"><span class="tag">P0</span><strong>复杂问题结构化与真实性校准诊断</strong><span class="muted">最承接 A 类能力</span></div>
+          <div class="funnel-step"><span class="tag">P0</span><strong>转型期个人/专家的能力商业化诊断</strong><span class="muted">与自身问题贴近</span></div>
+          <div class="funnel-step"><span class="tag amber">P1</span><strong>能力地图 + AI 知识库框架搭建</strong><span class="muted">强候选，需验证付费</span></div>
+          <div class="funnel-step"><span class="tag amber">P1</span><strong>项目/产品方向的真实性校准</strong><span class="muted">注意表达承受度</span></div>
+        </div>
+      </section>
+
+      <section id="next">
+        <div class="section-head">
+          <div>
+            <h2>6. 进入第二步前还缺什么</h2>
+            <p>能力不能直接推出商业方向。第二步要先补现实边界，再生成 3-7 个商业切口假设，最后做轻量调研和最小付费验证计划。</p>
+          </div>
+          <span class="tag blue">Next Input</span>
+        </div>
+        <div class="next-info">
+          <div class="info-box"><strong>资源边界</strong><p class="muted">时间、精力、现金流压力、人脉、社群、渠道、可信背书。</p></div>
+          <div class="info-box"><strong>偏好边界</strong><p class="muted">不想做的服务形式、不能承受的压力类型、愿意服务的人群。</p></div>
+          <div class="info-box"><strong>验证边界</strong><p class="muted">愿意用多低成本、多短周期先验证第一单。</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

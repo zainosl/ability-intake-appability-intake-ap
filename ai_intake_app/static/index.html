@@ -9,8 +9,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>能力资产诊断 · AI 前置采集</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260621export" />
-    <link rel="stylesheet" href="styles.css?v=20260621export" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260624zhanglu" />
+    <link rel="stylesheet" href="styles.css?v=20260624zhanglu" />
   </head>
   <body>
     <div class="admin-gate" id="adminGate" hidden>
@@ -50,6 +50,19 @@
             <input name="api_key" type="password" placeholder="OpenAI API Key" autocomplete="off" />
             <button type="submit">设置 Key</button>
           </form>
+        </div>
+      </section>
+
+      <section class="deliverable-strip" aria-label="张麓交付物">
+        <div>
+          <p class="eyebrow">张麓 · 第一步交付物</p>
+          <h3>阶段结果入口</h3>
+        </div>
+        <div class="deliverable-links">
+          <a href="/static/deliverables/zhanglu-co-creation-workbench.html" target="_blank" rel="noopener">交付物共创校准工作台</a>
+          <a href="/static/deliverables/zhanglu-co-creation-materials.md" download>下载共创校准 Markdown</a>
+          <a href="/static/deliverables/zhanglu-ability-assets-final-workbench.html" target="_blank" rel="noopener">能力资产诊断最终交付</a>
+          <a href="/static/deliverables/zhanglu-business-preference-constraints.html" target="_blank" rel="noopener">商业方向偏好与约束表</a>
         </div>
       </section>
 
@@ -276,11 +289,11 @@
       <p id="busyText">处理中...</p>
     </dialog>
 
-    <script src="/static/app.js?v=20260621export"></script>
+    <script src="/static/app.js?v=20260624zhanglu"></script>
     <script>
       if (!window.__abilityIntakeLoaded) {
         const script = document.createElement("script");
-        script.src = "app.js?v=20260621export";
+        script.src = "app.js?v=20260624zhanglu";
         document.body.appendChild(script);
       }
     </script>
