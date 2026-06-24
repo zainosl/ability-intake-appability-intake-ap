@@ -225,6 +225,27 @@
       color: var(--bg);
     }
 
+    .btn:disabled {
+      cursor: wait;
+      opacity: 0.62;
+      transform: none;
+    }
+
+    .save-status {
+      margin: 14px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .save-status.success {
+      color: var(--accent);
+    }
+
+    .save-status.error {
+      color: var(--accent-3);
+    }
+
     .section {
       max-width: 1280px;
       margin: 28px auto;
@@ -695,7 +716,7 @@
       <header>
         <p class="eyebrow">第二步 · 商业方向选择与收敛</p>
         <h1>张麓商业方向偏好与约束表</h1>
-        <p class="intro">先完成选择和填写，最后看底部汇总结果。页面会自动保存，并按三行呈现：类型、偏好、约束。没有想法的约束项可以不填。</p>
+        <p class="intro">先完成选择和填写，最后看底部汇总结果。页面会自动保存到你当前浏览器；填写完成后，请点击“提交保存给顾问”，这样顾问端才能收到。没有想法的约束项可以不填。</p>
         <div class="hero-grid">
           <div class="hero-metric">
             <strong>先选择偏好</strong>
@@ -712,10 +733,12 @@
         </div>
         <div class="toolbar">
           <button class="btn" id="jumpResultBtn" type="button">查看汇总</button>
+          <button class="btn primary" id="submitBtn" type="button">提交保存给顾问</button>
           <button class="btn primary" id="exportBtn" type="button">导出 Markdown</button>
           <button class="btn" id="copyBtn" type="button">复制结果</button>
           <button class="btn" id="resetBtn" type="button">清空</button>
         </div>
+        <p class="save-status" id="saveStatus">草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </header>
       <div id="formRoot"></div>
     </section>
@@ -732,8 +755,9 @@
         <div class="matrix-wrap">
           <table class="result-matrix" id="summaryTable" aria-label="实时三行汇总"></table>
         </div>
-        <p class="summary-note">填写完成后看这里。横向滚动可以查看全部类型，结果会自动保存在本机浏览器里。</p>
+        <p class="summary-note">填写完成后看这里。横向滚动可以查看全部类型。页面会自动保存本机草稿，但需要点击“提交保存给顾问”才会上传到服务器。</p>
         <div class="summary-actions">
+          <button class="btn primary" id="submitResultBtn" type="button">提交保存给顾问</button>
           <button class="btn primary" id="downloadResultBtn" type="button">下载结果</button>
           <button class="btn" id="copyResultBtn" type="button">复制结果</button>
         </div>
@@ -1232,6 +1256,45 @@
       return header + pref + cons;
     }
 
+    function setSaveStatus(text, type = "") {
+      const node = document.getElementById("saveStatus");
+      node.textContent = text;
+      node.className = `save-status ${type}`.trim();
+    }
+
+    function setSubmitBusy(isBusy) {
+      document.getElementById("submitBtn").disabled = isBusy;
+      document.getElementById("submitResultBtn").disabled = isBusy;
+    }
+
+    async function submitToAdvisor() {
+      setSubmitBusy(true);
+      setSaveStatus("正在提交保存给顾问...", "");
+      try {
+        const response = await fetch("/api/deliverable-submissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            deliverable_id: "zhanglu-business-preference-constraints",
+            client_name: "张麓",
+            title: "商业方向偏好与约束表",
+            state,
+            markdown: buildMarkdown()
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
+        const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
+        setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
+        showToast("已提交保存给顾问");
+      } catch (error) {
+        setSaveStatus(`提交失败：${error.message}。请先下载或复制结果，避免丢失。`, "error");
+        showToast("提交失败，请下载备份");
+      } finally {
+        setSubmitBusy(false);
+      }
+    }
+
     function plain(html) {
       return (html || "未填写")
         .replace(/<br>/g, "；")
@@ -1298,8 +1361,10 @@
     }
 
     document.getElementById("exportBtn").addEventListener("click", downloadMarkdown);
+    document.getElementById("submitBtn").addEventListener("click", submitToAdvisor);
     document.getElementById("copyBtn").addEventListener("click", copyMarkdown);
     document.getElementById("resetBtn").addEventListener("click", resetForm);
+    document.getElementById("submitResultBtn").addEventListener("click", submitToAdvisor);
     document.getElementById("downloadResultBtn").addEventListener("click", downloadMarkdown);
     document.getElementById("copyResultBtn").addEventListener("click", copyMarkdown);
     document.getElementById("jumpResultBtn").addEventListener("click", () => {

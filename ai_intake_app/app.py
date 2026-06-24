@@ -62,6 +62,8 @@ def admin_token():
 def is_public_api(method, path):
     if path in {"/api/health", "/api/auth/status", "/api/auth/login"}:
         return True
+    if method == "POST" and path == "/api/deliverable-submissions":
+        return True
     if method == "GET" and path.startswith("/api/client/sessions/"):
         return True
     if method == "POST" and path.startswith("/api/sessions/"):
@@ -604,9 +606,20 @@ def init_db():
                 created_at TEXT NOT NULL,
                 FOREIGN KEY(session_id) REFERENCES sessions(id)
             );
+            CREATE TABLE IF NOT EXISTS deliverable_submissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                deliverable_id TEXT NOT NULL,
+                client_name TEXT,
+                title TEXT,
+                state_json TEXT NOT NULL,
+                markdown TEXT NOT NULL,
+                user_agent TEXT,
+                created_at TEXT NOT NULL
+            );
             CREATE INDEX IF NOT EXISTS idx_files_session ON files(session_id);
             CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
             CREATE INDEX IF NOT EXISTS idx_reports_session ON reports(session_id);
+            CREATE INDEX IF NOT EXISTS idx_deliverable_submissions_key ON deliverable_submissions(deliverable_id, created_at);
             """
         )
 
@@ -1668,6 +1681,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.auth_status()
             if parsed.path == "/api/sessions":
                 return self.list_sessions()
+            if parsed.path == "/api/deliverable-submissions":
+                return self.list_deliverable_submissions()
             if parsed.path.startswith("/api/client/sessions/"):
                 parts = parsed.path.strip("/").split("/")
                 if len(parts) == 4:
@@ -1692,6 +1707,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.set_openai_key()
             if parsed.path == "/api/sessions":
                 return self.create_session()
+            if parsed.path == "/api/deliverable-submissions":
+                return self.create_deliverable_submission()
             if parsed.path.startswith("/api/sessions/"):
                 parts = parsed.path.strip("/").split("/")
                 session_id = int(parts[2])
@@ -1787,6 +1804,50 @@ class Handler(BaseHTTPRequestHandler):
         with db() as conn:
             rows = conn.execute("SELECT * FROM sessions ORDER BY updated_at DESC").fetchall()
         return self.json({"sessions": [row_to_dict(r) for r in rows]})
+
+    def create_deliverable_submission(self):
+        data = self.read_json()
+        deliverable_id = (data.get("deliverable_id") or "").strip()
+        markdown = data.get("markdown") or ""
+        state = data.get("state") or {}
+        if not deliverable_id:
+            return self.json({"error": "deliverable_id required"}, 400)
+        if not markdown.strip():
+            return self.json({"error": "markdown required"}, 400)
+        created_at = now_iso()
+        with db() as conn:
+            cur = conn.execute(
+                """
+                INSERT INTO deliverable_submissions(
+                    deliverable_id, client_name, title, state_json, markdown, user_agent, created_at
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (
+                    deliverable_id,
+                    data.get("client_name", ""),
+                    data.get("title", ""),
+                    json.dumps(state, ensure_ascii=False),
+                    markdown,
+                    self.headers.get("User-Agent", ""),
+                    created_at,
+                ),
+            )
+        return self.json({"ok": True, "id": cur.lastrowid, "created_at": created_at})
+
+    def list_deliverable_submissions(self):
+        query = parse_qs(urlparse(self.path).query)
+        deliverable_id = (query.get("deliverable_id") or [""])[0].strip()
+        limit = min(50, max(1, int((query.get("limit") or ["20"])[0] or "20")))
+        sql = "SELECT id, deliverable_id, client_name, title, markdown, created_at FROM deliverable_submissions"
+        params = []
+        if deliverable_id:
+            sql += " WHERE deliverable_id=?"
+            params.append(deliverable_id)
+        sql += " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+        with db() as conn:
+            rows = conn.execute(sql, params).fetchall()
+        return self.json({"submissions": [row_to_dict(r) for r in rows]})
 
     def get_session(self, session_id):
         context = get_session_context(session_id)
