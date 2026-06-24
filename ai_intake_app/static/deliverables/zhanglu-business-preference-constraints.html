@@ -520,6 +520,70 @@
       padding: 10px;
     }
 
+    .stage-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(11, 13, 15, 0.72);
+    }
+
+    .stage-table {
+      width: 100%;
+      min-width: 880px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .stage-table th,
+    .stage-table td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .stage-table th {
+      background: rgba(88, 225, 193, 0.08);
+      color: var(--accent);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stage-table th:last-child,
+    .stage-table td:last-child {
+      border-right: 0;
+    }
+
+    .stage-row {
+      cursor: pointer;
+      transition: 160ms ease;
+    }
+
+    .stage-row:hover {
+      background: rgba(88, 225, 193, 0.045);
+    }
+
+    .stage-row:has(input:checked) {
+      background: rgba(88, 225, 193, 0.10);
+      box-shadow: inset 2px 0 0 var(--accent);
+    }
+
+    .stage-table input {
+      accent-color: var(--accent);
+    }
+
+    .stage-name {
+      color: var(--ink);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stage-loss {
+      color: var(--accent-3);
+      font-weight: 800;
+    }
+
     .summary-card {
       max-width: 1280px;
       margin: 0 auto;
@@ -835,7 +899,15 @@
           { kind: "rank", key: "tracksRank", label: "大赛道前三排序" },
           { kind: "check", key: "type", label: "你更有感觉的商业类型", options: ["线上", "线下", "实体产品", "虚拟服务"] },
           { kind: "rank", key: "typeRank", label: "商业类型前三排序" },
-          { kind: "radio", key: "stage", label: "你希望未来大概走到哪个收入阶段", options: ["副业：1 个人，年营收 6 万，亏损几万", "全职个体：1 个人，年营收 10-30 万，亏损几十万", "工作室：5-20 人，年营收 300 万以内，亏损 100-200 万", "小规模公司：20-100 人，年营收 1000 万以内，亏损 300-500 万", "体系增长：100-300 人，年营收 5000 万以内，亏损 1000 万+", "细分头部：300 人以上，年营收 1 个亿，亏损 5000 万+", "做大上市：1000 人以上，年营收 5 个亿，亏损亿+"] },
+          { kind: "stage_table", key: "stage", label: "你希望未来大概走到哪个收入阶段", hint: "这里不是预测，而是帮助你感受不同收入目标背后的组织重量、资金风险和亏损承受力。请选择你真正愿意承受的阶段，而不是只看营收数字。", rows: [
+            { stage: "副业试水", scale: "1 个人", revenue: "年营收约 6 万", loss: "可能亏损几万", pressure: "主要投入时间、工具、小额投放；适合低风险验证。" },
+            { stage: "全职个体", scale: "1 个人", revenue: "年营收 10-30 万", loss: "可能亏损几十万", pressure: "需要承担机会成本、现金流波动和持续获客压力。" },
+            { stage: "小工作室", scale: "5-20 人", revenue: "年营收 300 万以内", loss: "可能亏损 100-200 万", pressure: "开始有团队工资、管理、交付稳定性和销售压力。" },
+            { stage: "小规模公司", scale: "20-100 人", revenue: "年营收 1000 万以内", loss: "可能亏损 300-500 万", pressure: "需要组织管理、流程、预算、招聘和更强增长系统。" },
+            { stage: "体系增长", scale: "100-300 人", revenue: "年营收 5000 万以内", loss: "可能亏损 1000 万+", pressure: "需要融资/强现金流、管理层、规模化获客和抗周期能力。" },
+            { stage: "细分头部", scale: "300 人以上", revenue: "年营收约 1 个亿", loss: "可能亏损 5000 万+", pressure: "高组织复杂度、高资本消耗、高品牌与合规压力。" },
+            { stage: "做大上市", scale: "1000 人以上", revenue: "年营收 5 个亿+", loss: "可能亏损过亿", pressure: "资本市场、全国化组织、长期高压增长与治理成本。" }
+          ] },
           { kind: "range", key: "concentration", label: "竞争集中度偏好", min: 0, max: 10, hint: "0 = 散点多元；10 = 一家通吃" }
         ],
         cons: [
@@ -1024,6 +1096,44 @@
           </label>`;
       }
 
+      if (field.kind === "stage_table") {
+        const current = valueFor(section.id, field.key, "");
+        return `
+          <div class="field">
+            <span class="field-label">${escapeHtml(field.label)}</span>
+            ${field.hint ? `<p class="hint">${escapeHtml(field.hint)}</p>` : ""}
+            <div class="stage-table-wrap">
+              <table class="stage-table">
+                <thead>
+                  <tr>
+                    <th>选择</th>
+                    <th>收入阶段</th>
+                    <th>规模</th>
+                    <th>年营收</th>
+                    <th>可能亏损/投入</th>
+                    <th>典型压力</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${field.rows.map(row => {
+                    const value = `${row.stage}｜${row.scale}｜${row.revenue}｜${row.loss}`;
+                    const checked = current === value;
+                    return `
+                      <tr class="stage-row">
+                        <td><input type="radio" name="${name}" value="${escapeHtml(value)}" ${checked ? "checked" : ""}></td>
+                        <td class="stage-name">${escapeHtml(row.stage)}</td>
+                        <td>${escapeHtml(row.scale)}</td>
+                        <td>${escapeHtml(row.revenue)}</td>
+                        <td class="stage-loss">${escapeHtml(row.loss)}</td>
+                        <td>${escapeHtml(row.pressure)}</td>
+                      </tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+
       if (field.kind === "rank") {
         const values = valueFor(section.id, field.key, ["", "", ""]);
         return `
@@ -1199,7 +1309,7 @@
           .map(([name, text]) => `${name}：${text}`)
           .join("；");
       }
-      return String(value).trim().replace(/\n+/g, "；");
+      return String(value).trim().replace(/\n+/g, "；").replace(/｜/g, "；");
     }
 
     function summarizeFields(section, fields) {
