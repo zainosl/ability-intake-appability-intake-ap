@@ -16,6 +16,8 @@ const MANUAL_TASK_HINTS = {
   material_organization: "第二步：建议先保存材料规整结果，再生成材料分析输入包。保存后系统会进入 materials_organized 状态。",
 };
 
+const ZHANGLU_DELIVERABLE_ID = "zhanglu-business-preference-constraints";
+
 const el = (id) => document.getElementById(id);
 
 function showBusy(text) {
@@ -235,20 +237,21 @@ async function loadSessions() {
 }
 
 async function loadDeliverableSubmissions() {
+  if (!shouldShowZhangluDeliverables()) return;
   const list = el("deliverableSubmissionsList");
   if (!list) return;
   list.textContent = "正在检查提交结果...";
   try {
-    const data = await api("/api/deliverable-submissions?deliverable_id=zhanglu-business-preference-constraints&limit=5");
+    const data = await api(`/api/deliverable-submissions?deliverable_id=${ZHANGLU_DELIVERABLE_ID}&limit=1`);
     const submissions = data.submissions || [];
     if (!submissions.length) {
       list.textContent = "还没有收到用户提交。用户填写后需要点击“提交保存给顾问”。";
       return;
     }
-    list.innerHTML = submissions.map((item, index) => `
+    list.innerHTML = submissions.slice(0, 1).map((item) => `
       <article class="deliverable-submission-card">
         <strong>${escapeHtml(item.client_name || "未命名用户")} · ${escapeHtml(item.title || "商业方向偏好与约束表")}</strong>
-        <span>${index === 0 ? "最新提交 · " : ""}${formatDate(item.created_at)} · 提交 ID ${item.id}</span>
+        <span>最新提交 · ${formatDate(item.created_at)} · 提交 ID ${item.id}</span>
         <pre>${escapeHtml(markdownPreview(item.markdown))}</pre>
         <div class="deliverable-submission-actions">
           <button type="button" data-copy-submission="${item.id}">复制完整 Markdown</button>
@@ -301,7 +304,27 @@ function renderSession() {
   renderChat();
   renderReport();
   renderMaterialDecision();
+  renderBoundDeliverables();
   renderNextStep();
+}
+
+function shouldShowZhangluDeliverables() {
+  const name = currentSession?.session?.client_name || "";
+  return name.replace(/\s/g, "").includes("张麓");
+}
+
+async function renderBoundDeliverables() {
+  const shouldShow = shouldShowZhangluDeliverables();
+  const strip = el("zhangluDeliverableStrip");
+  const panel = el("zhangluSubmissionPanel");
+  if (strip) strip.hidden = !shouldShow;
+  if (panel) panel.hidden = !shouldShow;
+  if (!shouldShow) {
+    const list = el("deliverableSubmissionsList");
+    if (list) list.textContent = "";
+    return;
+  }
+  await loadDeliverableSubmissions();
 }
 
 function renderClientLink(sessionId) {
@@ -1127,6 +1150,9 @@ function clearCurrent() {
   }
   el("report").className = "report empty";
   el("report").textContent = "还没有生成材料整理包或审阅材料。请先完成第一步上传材料，再点击“整理材料”。";
+  el("zhangluDeliverableStrip").hidden = true;
+  el("zhangluSubmissionPanel").hidden = true;
+  el("deliverableSubmissionsList").textContent = "";
   showFeedback("", "info");
   setNextStep("先创建诊断档案，再上传材料。", "info");
   loadSessions();

@@ -731,14 +731,6 @@
             <span>type / preference / constraint</span>
           </div>
         </div>
-        <div class="toolbar">
-          <button class="btn" id="jumpResultBtn" type="button">查看汇总</button>
-          <button class="btn primary" id="submitBtn" type="button">提交保存给顾问</button>
-          <button class="btn primary" id="exportBtn" type="button">导出 Markdown</button>
-          <button class="btn" id="copyBtn" type="button">复制结果</button>
-          <button class="btn" id="resetBtn" type="button">清空</button>
-        </div>
-        <p class="save-status" data-save-status>草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </header>
       <div id="formRoot"></div>
     </section>
@@ -757,9 +749,10 @@
         </div>
         <p class="summary-note">填写完成后看这里。横向滚动可以查看全部类型。页面会自动保存本机草稿，但需要点击“提交保存给顾问”才会上传到服务器。</p>
         <div class="summary-actions">
-          <button class="btn primary" id="submitResultBtn" type="button">提交保存给顾问</button>
-          <button class="btn primary" id="downloadResultBtn" type="button">下载结果</button>
-          <button class="btn" id="copyResultBtn" type="button">复制结果</button>
+          <button class="btn primary" data-submit-action type="button">提交保存给顾问</button>
+          <button class="btn primary" data-download-action type="button">导出 Markdown</button>
+          <button class="btn" data-copy-action type="button">复制结果</button>
+          <button class="btn" id="resetBtn" type="button">清空</button>
         </div>
         <p class="save-status" data-save-status>草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </div>
@@ -1265,7 +1258,7 @@
     }
 
     function setSubmitBusy(isBusy) {
-      [document.getElementById("submitBtn"), document.getElementById("submitResultBtn")].forEach(button => {
+      document.querySelectorAll("[data-submit-action]").forEach(button => {
         button.disabled = isBusy;
         button.textContent = isBusy ? "正在提交..." : "提交保存给顾问";
       });
@@ -1290,7 +1283,7 @@
         if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
         const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
         setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
-        [document.getElementById("submitBtn"), document.getElementById("submitResultBtn")].forEach(button => {
+        document.querySelectorAll("[data-submit-action]").forEach(button => {
           button.textContent = "已保存给顾问";
         });
         setTimeout(() => setSubmitBusy(false), 1800);
@@ -1299,7 +1292,8 @@
         setSaveStatus(`提交失败：${error.message}。请先下载或复制结果，避免丢失。`, "error");
         showToast("提交失败，请下载备份");
       } finally {
-        if (document.getElementById("submitBtn").textContent !== "已保存给顾问") {
+        const submitButton = document.querySelector("[data-submit-action]");
+        if (!submitButton || submitButton.textContent !== "已保存给顾问") {
           setSubmitBusy(false);
         }
       }
@@ -1370,16 +1364,10 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
     }
 
-    document.getElementById("exportBtn").addEventListener("click", downloadMarkdown);
-    document.getElementById("submitBtn").addEventListener("click", submitToAdvisor);
-    document.getElementById("copyBtn").addEventListener("click", copyMarkdown);
     document.getElementById("resetBtn").addEventListener("click", resetForm);
-    document.getElementById("submitResultBtn").addEventListener("click", submitToAdvisor);
-    document.getElementById("downloadResultBtn").addEventListener("click", downloadMarkdown);
-    document.getElementById("copyResultBtn").addEventListener("click", copyMarkdown);
-    document.getElementById("jumpResultBtn").addEventListener("click", () => {
-      document.getElementById("result").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    document.querySelectorAll("[data-submit-action]").forEach(button => button.addEventListener("click", submitToAdvisor));
+    document.querySelectorAll("[data-download-action]").forEach(button => button.addEventListener("click", downloadMarkdown));
+    document.querySelectorAll("[data-copy-action]").forEach(button => button.addEventListener("click", copyMarkdown));
 
     renderForm();
   </script>
