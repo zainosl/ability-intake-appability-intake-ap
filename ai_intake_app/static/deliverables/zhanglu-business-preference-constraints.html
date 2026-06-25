@@ -23,7 +23,8 @@
       --ok: rgba(88, 225, 193, 0.11);
       --warn: rgba(246, 182, 107, 0.10);
       --shadow: 0 30px 100px rgba(0, 0, 0, 0.34);
-      --radius: 2px;
+      --radius: 10px;
+      --radius-soft: 14px;
       --font-sans: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-family: var(--font-sans);
@@ -122,7 +123,7 @@
       margin: 0 0 14px;
       padding: 6px 14px;
       border: 1px solid rgba(88, 225, 193, 0.30);
-      border-radius: var(--radius);
+      border-radius: 999px;
       background: rgba(88, 225, 193, 0.025);
       color: var(--accent);
       font-family: var(--font-mono);
@@ -150,6 +151,30 @@
       line-height: 1.85;
     }
 
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 10px 16px;
+      border: 1px solid rgba(88, 225, 193, 0.34);
+      background: rgba(88, 225, 193, 0.07);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: clamp(18px, 1.8vw, 24px);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .user-badge span {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -169,7 +194,7 @@
       padding: 20px;
       background: rgba(19, 22, 26, 0.76);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: var(--radius-soft);
       position: relative;
     }
 
@@ -205,7 +230,7 @@
       background: transparent;
       color: var(--ink);
       padding: 14px 22px;
-      border-radius: var(--radius);
+      border-radius: var(--radius-soft);
       cursor: pointer;
       transition: 180ms ease;
       font-size: 15px;
@@ -232,8 +257,7 @@
     }
 
     .save-status {
-      margin: 14px 0 0;
-      max-width: 760px;
+      margin: 12px 0 0;
       color: var(--muted);
       font-size: 14px;
     }
@@ -252,7 +276,7 @@
       padding: clamp(26px, 3.2vw, 42px);
       background: var(--paper);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: var(--radius-soft);
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
       position: relative;
       overflow: hidden;
@@ -290,6 +314,13 @@
       text-align: right;
     }
 
+    .section-help {
+      margin: -10px 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
     .split {
       display: grid;
       grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
@@ -301,7 +332,7 @@
       padding: clamp(20px, 2.4vw, 30px);
       background: rgba(11, 13, 15, 0.62);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: var(--radius-soft);
     }
 
     .block.constraint {
@@ -352,6 +383,7 @@
       background: rgba(246, 182, 107, 0.09);
       border: 1px solid rgba(246, 182, 107, 0.28);
       border-left: 2px solid var(--accent-3);
+      border-radius: var(--radius);
       font-size: 15px;
       line-height: 1.7;
     }
@@ -370,6 +402,7 @@
       background: rgba(88, 225, 193, 0.055);
       border: 1px solid rgba(88, 225, 193, 0.22);
       border-left: 2px solid var(--accent);
+      border-radius: var(--radius);
       color: var(--muted);
       font-size: 15px;
       line-height: 1.8;
@@ -384,6 +417,13 @@
       font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+
+    .intro-note {
+      max-width: 880px;
+      margin-top: 24px;
+      color: var(--ink);
+      white-space: normal;
     }
 
     .choice-grid {
@@ -448,6 +488,10 @@
       resize: vertical;
     }
 
+    .constraint textarea {
+      min-height: 180px;
+    }
+
     textarea:focus, input[type="text"]:focus, select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(88, 225, 193, 0.08);
@@ -487,7 +531,7 @@
       width: 100%;
       border-collapse: collapse;
       overflow: hidden;
-      border-radius: var(--radius);
+      border-radius: var(--radius-soft);
       background: rgba(11, 13, 15, 0.72);
       border: 1px solid var(--line);
       font-size: 15px;
@@ -518,70 +562,6 @@
     .data-table select {
       min-width: 64px;
       padding: 10px;
-    }
-
-    .stage-table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(11, 13, 15, 0.72);
-    }
-
-    .stage-table {
-      width: 100%;
-      min-width: 880px;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .stage-table th,
-    .stage-table td {
-      border-bottom: 1px solid var(--line);
-      border-right: 1px solid var(--line);
-      padding: 12px;
-      vertical-align: top;
-      text-align: left;
-    }
-
-    .stage-table th {
-      background: rgba(88, 225, 193, 0.08);
-      color: var(--accent);
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .stage-table th:last-child,
-    .stage-table td:last-child {
-      border-right: 0;
-    }
-
-    .stage-row {
-      cursor: pointer;
-      transition: 160ms ease;
-    }
-
-    .stage-row:hover {
-      background: rgba(88, 225, 193, 0.045);
-    }
-
-    .stage-row:has(input:checked) {
-      background: rgba(88, 225, 193, 0.10);
-      box-shadow: inset 2px 0 0 var(--accent);
-    }
-
-    .stage-table input {
-      accent-color: var(--accent);
-    }
-
-    .stage-name {
-      color: var(--ink);
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .stage-loss {
-      color: var(--accent-3);
-      font-weight: 800;
     }
 
     .summary-card {
@@ -764,8 +744,8 @@
     <nav class="side-nav" aria-label="页面目录">
       <p class="side-nav-title">目录</p>
       <a href="#section-boundary">0. 现实边界</a>
-      <a href="#section-direction">1. 商业方向</a>
-      <a href="#section-mission">2. 初心</a>
+      <a href="#section-mission">1. 初心</a>
+      <a href="#section-direction">2. 商业方向</a>
       <a href="#section-ability">3. 能力</a>
       <a href="#section-resource">4. 资源</a>
       <a href="#section-user">5. 用户</a>
@@ -779,8 +759,11 @@
     <section class="form-pane">
       <header>
         <p class="eyebrow">第二步 · 商业方向选择与收敛</p>
-        <h1>张麓商业方向偏好与约束表</h1>
-        <p class="intro">先完成选择和填写，最后看底部汇总结果。页面会自动保存到你当前浏览器；填写完成后，请点击“提交保存给顾问”，这样顾问端才能收到。没有想法的约束项可以不填。</p>
+        <h1>商业方向偏好与约束表</h1>
+        <div class="user-badge"><span>USER</span>张麓</div>
+        <div class="example-card intro-note">
+          <strong>填写说明</strong>这不是考试，也不是完整商业计划书。所有内容都是非必填，只填你已经想清楚、有直觉的部分就好；没想好的地方可以空着。你可以先选有感觉的偏好，再补充明确不想做或不能承受的约束。如果填到某个问题觉得很重要、但自己暂时没法决定，也可以先空着，之后找我一起聊一遍。页面会自动保存，最后按三行呈现：类型、偏好、约束。
+        </div>
         <div class="hero-grid">
           <div class="hero-metric">
             <strong>先选择偏好</strong>
@@ -813,12 +796,12 @@
         </div>
         <p class="summary-note">填写完成后看这里。横向滚动可以查看全部类型。页面会自动保存本机草稿，但需要点击“提交保存给顾问”才会上传到服务器。</p>
         <div class="summary-actions">
-          <button class="btn primary" data-submit-action type="button">提交保存给顾问</button>
-          <button class="btn primary" data-download-action type="button">导出 Markdown</button>
-          <button class="btn" data-copy-action type="button">复制结果</button>
+          <button class="btn primary" id="saveForAdvisorBtn" type="button">提交保存给顾问</button>
+          <button class="btn" id="exportBtn" type="button">导出 Markdown</button>
+          <button class="btn" id="copyBtn" type="button">复制结果</button>
           <button class="btn" id="resetBtn" type="button">清空</button>
         </div>
-        <p class="save-status" data-save-status>草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
+        <p class="save-status" id="saveStatus">草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
       </div>
     </section>
   </main>
@@ -892,39 +875,34 @@
         ]
       },
       {
+        id: "mission",
+        title: "1. 初心",
+        pref: [
+          { kind: "example", title: "Example", text: "我是成就型，我希望能够帮助影响很多人。\n\n方式：\n我会通过提升全人类的思维水平，并且是基于商业成功的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得成就感、出名感。\n\n理想生活：\n在实现以后，我可以享受自由且健康的生活，有能力照顾我关心的人，和伴侣朋友开心地生活。" },
+          { kind: "example", title: "填写格式", text: "我是____型的人，我希望能够帮助/影响____。\n\n方式：\n我会通过____，并且基于____的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得____。\n\n理想生活：\n在实现以后，我可以____。" },
+          { kind: "textarea", key: "mission", label: "使命、愿景或长期想做的事。没有可以写“暂时没有”。", placeholder: "可以直接按上面的格式填写，也可以自由写。" },
+          { kind: "textarea", key: "benchmarks", label: "如果你自己有对标人物或对标作品，可以写在这里。没有可以不写。", placeholder: "1. \n2. \n3. " }
+        ],
+        cons: [
+          { kind: "textarea", key: "missionAvoid", label: "哪些事即使赚钱，也不符合你的初心？没有可以不填。", placeholder: "例如：夸张包装、情绪操控、制造焦虑、短期割韭菜、过度迎合流量、牺牲长期信任、牺牲健康、牺牲自由、牺牲独立判断。" }
+        ]
+      },
+      {
         id: "direction",
-        title: "1. 商业方向",
+        title: "2. 商业方向",
         pref: [
           { kind: "check", key: "tracks", label: "你有兴趣的大赛道", options: ["健康", "幸福", "关系", "亲子", "教育", "财富", "其他"] },
           { kind: "rank", key: "tracksRank", label: "大赛道前三排序" },
           { kind: "check", key: "type", label: "你更有感觉的商业类型", options: ["线上", "线下", "实体产品", "虚拟服务"] },
           { kind: "rank", key: "typeRank", label: "商业类型前三排序" },
-          { kind: "stage_table", key: "stage", label: "你希望未来大概走到哪个收入阶段", hint: "这里不是预测，而是帮助你感受不同收入目标背后的组织重量、资金风险和亏损承受力。请选择你真正愿意承受的阶段，而不是只看营收数字。", rows: [
-            { stage: "副业试水", scale: "1 个人", revenue: "年营收约 6 万", loss: "可能亏损几万", pressure: "主要投入时间、工具、小额投放；适合低风险验证。" },
-            { stage: "全职个体", scale: "1 个人", revenue: "年营收 10-30 万", loss: "可能亏损几十万", pressure: "需要承担机会成本、现金流波动和持续获客压力。" },
-            { stage: "小工作室", scale: "5-20 人", revenue: "年营收 300 万以内", loss: "可能亏损 100-200 万", pressure: "开始有团队工资、管理、交付稳定性和销售压力。" },
-            { stage: "小规模公司", scale: "20-100 人", revenue: "年营收 1000 万以内", loss: "可能亏损 300-500 万", pressure: "需要组织管理、流程、预算、招聘和更强增长系统。" },
-            { stage: "体系增长", scale: "100-300 人", revenue: "年营收 5000 万以内", loss: "可能亏损 1000 万+", pressure: "需要融资/强现金流、管理层、规模化获客和抗周期能力。" },
-            { stage: "细分头部", scale: "300 人以上", revenue: "年营收约 1 个亿", loss: "可能亏损 5000 万+", pressure: "高组织复杂度、高资本消耗、高品牌与合规压力。" },
-            { stage: "做大上市", scale: "1000 人以上", revenue: "年营收 5 个亿+", loss: "可能亏损过亿", pressure: "资本市场、全国化组织、长期高压增长与治理成本。" }
-          ] },
-          { kind: "range", key: "concentration", label: "竞争集中度偏好", min: 0, max: 10, hint: "0 = 散点多元；10 = 一家通吃" }
+          { kind: "radio", key: "annualIncome", label: "你对这个方向的预期年收入大概是哪一档", options: ["副业：1 个人，年收入约 6 万", "全职个体：1 个人，年收入 10-30 万", "工作室：5-20 人，年营收 300 万以内", "小规模公司：20-100 人，年营收 1000 万以内", "体系增长：100-300 人，年营收 5000 万以内", "细分头部：300 人以上，年营收 1 个亿左右", "做大上市：1000 人以上，年营收 5 个亿以上"] },
+          { kind: "radio", key: "selfFunding", label: "你能接受投入的自有资金大概是多少", options: ["尽量不投入资金", "1 万以内", "1-5 万", "5-20 万", "20-50 万", "50 万以上", "暂时不确定"] },
+          { kind: "radio", key: "lossTolerance", label: "你能承受的试错亏损大概是多少", options: ["不能接受明显亏损", "1 万以内", "1-5 万", "5-20 万", "20-50 万", "50 万以上", "暂时不确定"] },
+          { kind: "range", key: "concentration", label: "你更想进入哪种竞争格局的市场", min: 0, max: 10, hint: "0 = 散点市场：竞争对手多，天花板不会太高，进入门槛低，需要持续出摊，不能太懈怠。10 = 头部集中市场：进入门槛高，资源要求高，但后面可以形成更有护城河的市场。" }
         ],
         cons: [
           { kind: "textarea", key: "avoidDirection", label: "你明确不想进入的商业方向/类型。没有想法可以不写。", placeholder: "1. \n2. \n3. " },
           { kind: "note", text: "从之前的沟通交流和能力挖掘来看，你可能不适合一开始就做大而重、强组织管理、强融资、强规模化的商业模式。如果你认同，可以写进上面的约束里。" }
-        ]
-      },
-      {
-        id: "mission",
-        title: "2. 初心",
-        pref: [
-          { kind: "example", title: "Example", text: "我是成就型，我希望能够帮助影响很多人。\n\n方式：\n我会通过提升全人类的思维水平，并且是基于商业成功的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得成就感、出名感。\n\n理想生活：\n在实现以后，我可以享受自由且健康的生活，有能力照顾我关心的人，和伴侣朋友开心地生活。" },
-          { kind: "textarea", key: "mission", label: "使命、愿景或长期想做的事。没有可以写“暂时没有”。", placeholder: "我是____型的人，我希望能够帮助/影响____。\n\n方式：\n我会通过____，并且基于____的方式去实现它。\n\n自我实现：\n同时，我在这条路上可以获得____。\n\n理想生活：\n在实现以后，我可以____。" },
-          { kind: "textarea", key: "benchmarks", label: "如果你自己有对标人物或对标作品，可以写在这里。没有可以不写。", placeholder: "1. \n2. \n3. " }
-        ],
-        cons: [
-          { kind: "textarea", key: "missionAvoid", label: "哪些事即使赚钱，也不符合你的初心？没有可以不填。", placeholder: "例如：夸张包装、情绪操控、制造焦虑、短期割韭菜、过度迎合流量、牺牲长期信任、牺牲健康、牺牲自由、牺牲独立判断。" }
         ]
       },
       {
@@ -1080,11 +1058,13 @@
 
       if (field.kind === "check" || field.kind === "radio") {
         const type = field.kind === "check" ? "checkbox" : "radio";
+        const otherName = `${name}__other`;
         return `
           <div class="field">
             <span class="field-label">${escapeHtml(field.label)}</span>
             ${field.hint ? `<p class="hint">${escapeHtml(field.hint)}</p>` : ""}
             <div class="choice-grid">${field.options.map(option => makeChoice(section, field, option, type)).join("")}</div>
+            <input type="text" name="${otherName}" placeholder="其他补充（可不填）" value="${escapeHtml(state[otherName] || "")}" style="margin-top: 12px;">
           </div>`;
       }
 
@@ -1094,44 +1074,6 @@
             <span class="field-label">${escapeHtml(field.label)}</span>
             <textarea name="${name}" placeholder="${escapeHtml(field.placeholder || "")}">${escapeHtml(valueFor(section.id, field.key, ""))}</textarea>
           </label>`;
-      }
-
-      if (field.kind === "stage_table") {
-        const current = valueFor(section.id, field.key, "");
-        return `
-          <div class="field">
-            <span class="field-label">${escapeHtml(field.label)}</span>
-            ${field.hint ? `<p class="hint">${escapeHtml(field.hint)}</p>` : ""}
-            <div class="stage-table-wrap">
-              <table class="stage-table">
-                <thead>
-                  <tr>
-                    <th>选择</th>
-                    <th>收入阶段</th>
-                    <th>规模</th>
-                    <th>年营收</th>
-                    <th>可能亏损/投入</th>
-                    <th>典型压力</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${field.rows.map(row => {
-                    const value = `${row.stage}｜${row.scale}｜${row.revenue}｜${row.loss}`;
-                    const checked = current === value;
-                    return `
-                      <tr class="stage-row">
-                        <td><input type="radio" name="${name}" value="${escapeHtml(value)}" ${checked ? "checked" : ""}></td>
-                        <td class="stage-name">${escapeHtml(row.stage)}</td>
-                        <td>${escapeHtml(row.scale)}</td>
-                        <td>${escapeHtml(row.revenue)}</td>
-                        <td class="stage-loss">${escapeHtml(row.loss)}</td>
-                        <td>${escapeHtml(row.pressure)}</td>
-                      </tr>`;
-                  }).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>`;
       }
 
       if (field.kind === "rank") {
@@ -1213,6 +1155,7 @@
             <h2>${escapeHtml(section.title)}</h2>
             <div class="section-count" data-count="${section.id}">未填写</div>
           </div>
+          <p class="section-help">所有内容都是非必填，只填你已经想清楚、有直觉的部分就好；没想好的地方可以空着。</p>
           ${section.intro ? `<div class="field">${section.intro}</div>` : ""}
           <div class="split">
             <div class="block">
@@ -1290,6 +1233,11 @@
       return valueFor(section.id, field.key, field.kind === "check" ? [] : "");
     }
 
+    function fieldOtherValue(section, field) {
+      if (field.kind !== "check" && field.kind !== "radio") return "";
+      return String(state[`${inputName(section.id, field.key)}__other`] || "").trim();
+    }
+
     function summarizeValue(value, field) {
       if (!isFilled(value)) return "";
       if (Array.isArray(value)) {
@@ -1309,7 +1257,7 @@
           .map(([name, text]) => `${name}：${text}`)
           .join("；");
       }
-      return String(value).trim().replace(/\n+/g, "；").replace(/｜/g, "；");
+      return String(value).trim().replace(/\n+/g, "；");
     }
 
     function summarizeFields(section, fields) {
@@ -1317,7 +1265,9 @@
         .filter(field => field.kind !== "note" && field.kind !== "example")
         .map(field => {
           const text = summarizeValue(fieldValue(section, field), field);
-          return text ? `${field.label.replace(/。.*$/, "").replace(/？.*$/, "")}：${text}` : "";
+          const other = fieldOtherValue(section, field);
+          const fullText = [text, other ? `其他：${other}` : ""].filter(Boolean).join("；");
+          return fullText ? `${field.label.replace(/。.*$/, "").replace(/？.*$/, "")}：${fullText}` : "";
         })
         .filter(Boolean)
         .join("<br>");
@@ -1325,7 +1275,7 @@
 
     function sectionCompletion(section) {
       const allFields = [...section.pref, ...section.cons].filter(field => field.kind !== "note" && field.kind !== "example");
-      const filled = allFields.filter(field => isFilled(fieldValue(section, field))).length;
+      const filled = allFields.filter(field => isFilled(fieldValue(section, field)) || isFilled(fieldOtherValue(section, field))).length;
       return { filled, total: allFields.length };
     }
 
@@ -1358,55 +1308,6 @@
       const pref = `| 偏好 | ${sections.map(section => plain(summarizeFields(section, section.pref))).join(" | ")} |\n`;
       const cons = `| 约束 | ${sections.map(section => plain(summarizeFields(section, section.cons))).join(" | ")} |\n`;
       return header + pref + cons;
-    }
-
-    function setSaveStatus(text, type = "") {
-      document.querySelectorAll("[data-save-status]").forEach(node => {
-        node.textContent = text;
-        node.className = `save-status ${type}`.trim();
-      });
-    }
-
-    function setSubmitBusy(isBusy) {
-      document.querySelectorAll("[data-submit-action]").forEach(button => {
-        button.disabled = isBusy;
-        button.textContent = isBusy ? "正在提交..." : "提交保存给顾问";
-      });
-    }
-
-    async function submitToAdvisor() {
-      setSubmitBusy(true);
-      setSaveStatus("正在提交保存给顾问...", "");
-      try {
-        const response = await fetch("/api/deliverable-submissions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            deliverable_id: "zhanglu-business-preference-constraints",
-            client_name: "张麓",
-            title: "商业方向偏好与约束表",
-            state,
-            markdown: buildMarkdown()
-          })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
-        const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
-        setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
-        document.querySelectorAll("[data-submit-action]").forEach(button => {
-          button.textContent = "已保存给顾问";
-        });
-        setTimeout(() => setSubmitBusy(false), 1800);
-        showToast("已提交保存给顾问");
-      } catch (error) {
-        setSaveStatus(`提交失败：${error.message}。请先下载或复制结果，避免丢失。`, "error");
-        showToast("提交失败，请下载备份");
-      } finally {
-        const submitButton = document.querySelector("[data-submit-action]");
-        if (!submitButton || submitButton.textContent !== "已保存给顾问") {
-          setSubmitBusy(false);
-        }
-      }
     }
 
     function plain(html) {
@@ -1465,6 +1366,48 @@
       showToast("已清空");
     }
 
+    function setSaveStatus(text, type = "") {
+      const node = document.getElementById("saveStatus");
+      node.textContent = text;
+      node.className = `save-status ${type}`.trim();
+    }
+
+    async function saveForAdvisor() {
+      saveState();
+      const button = document.getElementById("saveForAdvisorBtn");
+      button.disabled = true;
+      button.textContent = "正在提交...";
+      setSaveStatus("正在提交保存给顾问...", "");
+      try {
+        const response = await fetch("/api/deliverable-submissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            deliverable_id: "zhanglu-business-preference-constraints",
+            client_name: "张麓",
+            title: "商业方向偏好与约束表",
+            state,
+            markdown: buildMarkdown()
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
+        const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
+        setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
+        button.textContent = "已保存给顾问";
+        showToast("已提交保存给顾问");
+        setTimeout(() => {
+          button.disabled = false;
+          button.textContent = "提交保存给顾问";
+        }, 1800);
+      } catch (error) {
+        setSaveStatus(`提交失败：${error.message}。请先导出或复制结果，避免丢失。`, "error");
+        button.disabled = false;
+        button.textContent = "提交保存给顾问";
+        showToast("提交失败，请导出备份");
+      }
+    }
+
     let toastTimer;
     function showToast(text) {
       const toast = document.getElementById("toast");
@@ -1474,10 +1417,10 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
     }
 
+    document.getElementById("saveForAdvisorBtn").addEventListener("click", saveForAdvisor);
+    document.getElementById("exportBtn").addEventListener("click", downloadMarkdown);
+    document.getElementById("copyBtn").addEventListener("click", copyMarkdown);
     document.getElementById("resetBtn").addEventListener("click", resetForm);
-    document.querySelectorAll("[data-submit-action]").forEach(button => button.addEventListener("click", submitToAdvisor));
-    document.querySelectorAll("[data-download-action]").forEach(button => button.addEventListener("click", downloadMarkdown));
-    document.querySelectorAll("[data-copy-action]").forEach(button => button.addEventListener("click", copyMarkdown));
 
     renderForm();
   </script>
