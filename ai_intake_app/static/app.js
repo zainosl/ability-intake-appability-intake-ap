@@ -224,16 +224,79 @@ async function loadSessions() {
   const data = await api("/api/sessions");
   const list = el("sessionList");
   list.innerHTML = "";
-  data.sessions.forEach((s) => {
-    const card = document.createElement("div");
-    card.className = `session-card ${s.id === currentSessionId ? "active" : ""}`;
-    card.innerHTML = `
-      <strong>${escapeHtml(s.client_name)}</strong>
-      <span>${escapeHtml(s.status)} · ${formatDate(s.updated_at)}</span>
-    `;
-    card.addEventListener("click", () => selectSession(s.id));
-    list.appendChild(card);
-  });
+  if (!data.sessions.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-list";
+    empty.textContent = "还没有诊断档案。";
+    list.appendChild(empty);
+  }
+  data.sessions.forEach((s) => list.appendChild(renderSessionCard(s, "active")));
+  renderDeletedSessions(data.deleted_sessions || []);
+}
+
+function renderDeletedSessions(sessions) {
+  const list = el("deletedSessionList");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!sessions.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-list compact";
+    empty.textContent = "暂无已删除档案。";
+    list.appendChild(empty);
+    return;
+  }
+  sessions.forEach((s) => list.appendChild(renderSessionCard(s, "deleted")));
+}
+
+function renderSessionCard(session, mode) {
+  const card = document.createElement("div");
+  const isDeleted = mode === "deleted";
+  card.className = `session-card ${session.id === currentSessionId ? "active" : ""} ${isDeleted ? "deleted" : ""}`;
+  card.innerHTML = `
+    <div class="session-card-main">
+      <strong>${escapeHtml(session.client_name)}</strong>
+      <span>${escapeHtml(session.status)} · ${formatDate(isDeleted ? session.deleted_at : session.updated_at)}</span>
+    </div>
+    <button type="button" class="session-card-action ${isDeleted ? "restore" : "delete"}">
+      ${isDeleted ? "恢复" : "删除"}
+    </button>
+  `;
+  if (!isDeleted) {
+    card.addEventListener("click", () => selectSession(session.id));
+    card.querySelector(".session-card-action").addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteSession(session);
+    });
+  } else {
+    card.querySelector(".session-card-action").addEventListener("click", () => restoreSession(session));
+  }
+  return card;
+}
+
+async function deleteSession(session) {
+  if (!confirm(`确认删除「${session.client_name}」这个档案？删除后可以从“已删除档案”里恢复。`)) return;
+  try {
+    await api(`/api/sessions/${session.id}`, { method: "DELETE" });
+    if (currentSessionId === session.id) {
+      clearCurrent();
+    } else {
+      await loadSessions();
+    }
+    showFeedback(`已删除档案：${session.client_name}。可以在左侧“已删除档案”中恢复。`, "success");
+  } catch (err) {
+    showFeedback(`删除失败：${err.message}`, "error");
+  }
+}
+
+async function restoreSession(session) {
+  try {
+    await api(`/api/sessions/${session.id}/restore`, { method: "POST" });
+    await loadSessions();
+    await selectSession(session.id);
+    showFeedback(`已恢复档案：${session.client_name}。`, "success");
+  } catch (err) {
+    showFeedback(`恢复失败：${err.message}`, "error");
+  }
 }
 
 async function loadDeliverableSubmissions() {

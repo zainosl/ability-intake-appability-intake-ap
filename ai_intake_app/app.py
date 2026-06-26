@@ -622,6 +622,13 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_deliverable_submissions_key ON deliverable_submissions(deliverable_id, created_at);
             """
         )
+        ensure_column(conn, "sessions", "deleted_at", "TEXT")
+
+
+def ensure_column(conn, table, column, definition):
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    if column not in {row["name"] for row in rows}:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
 def touch_session(conn, session_id, status=None):
@@ -1712,6 +1719,8 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path.startswith("/api/sessions/"):
                 parts = parsed.path.strip("/").split("/")
                 session_id = int(parts[2])
+                if len(parts) == 4 and parts[3] == "restore":
+                    return self.restore_session(session_id)
                 if len(parts) == 4 and parts[3] == "upload":
                     return self.upload(session_id)
                 if len(parts) == 4 and parts[3] == "message":
@@ -1730,6 +1739,20 @@ class Handler(BaseHTTPRequestHandler):
                     return self.manual_ai_prompt(session_id)
                 if len(parts) == 4 and parts[3] == "manual-ai-output":
                     return self.manual_ai_output(session_id)
+            self.not_found()
+        except Exception as e:
+            self.error(e)
+
+    def do_DELETE(self):
+        try:
+            parsed = urlparse(self.path)
+            if parsed.path.startswith("/api/") and not is_public_api("DELETE", parsed.path):
+                if not self.require_admin():
+                    return
+            if parsed.path.startswith("/api/sessions/"):
+                parts = parsed.path.strip("/").split("/")
+                if len(parts) == 3:
+                    return self.delete_session(int(parts[2]))
             self.not_found()
         except Exception as e:
             self.error(e)
@@ -1802,8 +1825,34 @@ class Handler(BaseHTTPRequestHandler):
 
     def list_sessions(self):
         with db() as conn:
-            rows = conn.execute("SELECT * FROM sessions ORDER BY updated_at DESC").fetchall()
-        return self.json({"sessions": [row_to_dict(r) for r in rows]})
+            rows = conn.execute("SELECT * FROM sessions WHERE deleted_at IS NULL ORDER BY updated_at DESC").fetchall()
+            deleted_rows = conn.execute("SELECT * FROM sessions WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC").fetchall()
+        return self.json({
+            "sessions": [row_to_dict(r) for r in rows],
+            "deleted_sessions": [row_to_dict(r) for r in deleted_rows],
+        })
+
+    def delete_session(self, session_id):
+        deleted_at = now_iso()
+        with db() as conn:
+            cur = conn.execute(
+                "UPDATE sessions SET deleted_at=?, updated_at=? WHERE id=? AND deleted_at IS NULL",
+                (deleted_at, deleted_at, session_id),
+            )
+            if cur.rowcount == 0:
+                return self.json({"error": "档案不存在或已经删除。"}, 404)
+        return self.json({"ok": True, "id": session_id, "deleted_at": deleted_at})
+
+    def restore_session(self, session_id):
+        restored_at = now_iso()
+        with db() as conn:
+            cur = conn.execute(
+                "UPDATE sessions SET deleted_at=NULL, updated_at=? WHERE id=? AND deleted_at IS NOT NULL",
+                (restored_at, session_id),
+            )
+            if cur.rowcount == 0:
+                return self.json({"error": "档案不存在或不在已删除列表。"}, 404)
+        return self.json({"ok": True, "id": session_id, "updated_at": restored_at})
 
     def create_deliverable_submission(self):
         data = self.read_json()

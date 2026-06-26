@@ -347,12 +347,62 @@ button:disabled {
   margin-top: 22px;
 }
 
+.deleted-session-box {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.deleted-session-box summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.deleted-session-box .session-list {
+  margin-top: 12px;
+}
+
 .session-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   background: #fff;
   cursor: pointer;
+}
+
+.session-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.session-card-main {
+  min-width: 0;
+}
+
+.session-card-action {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.session-card-action.delete {
+  border-color: rgba(255, 139, 130, 0.34);
+  color: var(--danger);
+}
+
+.session-card-action.restore {
+  border-color: rgba(88, 225, 193, 0.34);
+  color: var(--green);
+}
+
+.session-card.deleted {
+  opacity: 0.72;
 }
 
 .session-card.active {
@@ -1807,6 +1857,25 @@ label,
 .session-card.active {
   border-color: rgba(88, 225, 193, 0.65);
   background: rgba(88, 225, 193, 0.1);
+}
+
+.deleted-session-box {
+  border-top-color: var(--line);
+}
+
+.session-card-action {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--line);
+}
+
+.session-card-action.delete:hover {
+  border-color: rgba(255, 139, 130, 0.46);
+  background: rgba(255, 139, 130, 0.08);
+}
+
+.session-card-action.restore:hover {
+  border-color: rgba(88, 225, 193, 0.46);
+  background: rgba(88, 225, 193, 0.08);
 }
 
 .status,
