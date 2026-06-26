@@ -687,6 +687,105 @@
       transform: translateY(0);
     }
 
+    .submitted-result-preview {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .submitted-result-preview[hidden] {
+      display: none;
+    }
+
+    .commercial-preview {
+      display: grid;
+      gap: 14px;
+    }
+
+    .commercial-preview-hero {
+      padding: 18px;
+      border: 1px solid rgba(88, 225, 193, 0.24);
+      border-radius: var(--radius);
+      background: var(--soft);
+    }
+
+    .commercial-preview-hero h3 {
+      margin: 4px 0 8px;
+      font-size: 24px;
+    }
+
+    .commercial-preview-hero span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .commercial-signal-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .commercial-signal-list li {
+      list-style: none;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(11, 13, 15, 0.42);
+    }
+
+    .commercial-signal-list b,
+    .commercial-signal-list span {
+      display: block;
+    }
+
+    .commercial-signal-list b {
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .commercial-signal-list span {
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .commercial-matrix {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .commercial-matrix section {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(11, 13, 15, 0.52);
+    }
+
+    .commercial-matrix strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-size: 15px;
+    }
+
+    .commercial-matrix p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .commercial-matrix p b {
+      display: inline-flex;
+      margin-right: 8px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: var(--accent);
+      background: rgba(88, 225, 193, 0.08);
+    }
+
     @media (max-width: 1080px) {
       .side-nav {
         position: static;
@@ -716,6 +815,11 @@
     }
 
     @media (max-width: 760px) {
+      .commercial-signal-list,
+      .commercial-matrix {
+        grid-template-columns: 1fr;
+      }
+
       .hero-grid {
         grid-template-columns: 1fr;
       }
@@ -802,6 +906,7 @@
           <button class="btn" id="resetBtn" type="button">清空</button>
         </div>
         <p class="save-status" id="saveStatus">草稿会自动保存在当前浏览器；尚未提交给顾问。</p>
+        <div class="submitted-result-preview" id="submittedResultPreview" hidden></div>
       </div>
     </section>
   </main>
@@ -1310,6 +1415,66 @@
       return header + pref + cons;
     }
 
+    function parseCommercialPreferenceMarkdown(markdown) {
+      const lines = String(markdown || "").split(/\r?\n/).filter(line => line.trim().startsWith("|"));
+      if (lines.length < 4) return null;
+      const splitRow = line => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim());
+      const header = splitRow(lines[0]).slice(1);
+      const pref = splitRow(lines.find(line => line.includes("| 偏好 |")) || "").slice(1);
+      const cons = splitRow(lines.find(line => line.includes("| 约束 |")) || "").slice(1);
+      if (!header.length) return null;
+      return header.map((title, index) => ({
+        title,
+        preference: pref[index] || "未填写",
+        constraint: cons[index] || "未填写"
+      }));
+    }
+
+    function compactCommercialText(text, max = 145) {
+      const clean = String(text || "").replace(/\s+/g, " ").trim();
+      if (!clean || clean === "未填写") return "未填写";
+      return clean.length > max ? `${clean.slice(0, max)}...` : clean;
+    }
+
+    function renderCommercialPreferencePreview(markdown, meta = "") {
+      const items = parseCommercialPreferenceMarkdown(markdown);
+      if (!items) return "";
+      const filled = items.filter(item => item.preference !== "未填写" || item.constraint !== "未填写").length;
+      const signalItems = items
+        .filter(item => item.preference !== "未填写")
+        .slice(0, 4)
+        .map(item => `<li><b>${escapeHtml(item.title)}</b><span>${escapeHtml(compactCommercialText(item.preference, 110))}</span></li>`)
+        .join("");
+      return `
+        <div class="commercial-preview">
+          <div class="commercial-preview-hero">
+            <p class="eyebrow">已提交结果</p>
+            <h3>商业方向偏好与约束结果</h3>
+            <span>${meta || `${filled}/${items.length} 类已填写。你和顾问可以基于这些边界进入第二步商业切口收敛。`}</span>
+          </div>
+          <div class="commercial-signal-list">
+            ${signalItems || "<p>还没有可展示的偏好信号。</p>"}
+          </div>
+          <div class="commercial-matrix">
+            ${items.map(item => `
+              <section>
+                <strong>${escapeHtml(item.title)}</strong>
+                <p><b>偏好</b>${escapeHtml(compactCommercialText(item.preference))}</p>
+                <p><b>约束</b>${escapeHtml(compactCommercialText(item.constraint))}</p>
+              </section>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function showSubmittedResult(markdown, meta = "") {
+      const box = document.getElementById("submittedResultPreview");
+      if (!box) return;
+      box.innerHTML = renderCommercialPreferencePreview(markdown, meta);
+      box.hidden = false;
+    }
+
     function plain(html) {
       return (html || "未填写")
         .replace(/<br>/g, "；")
@@ -1394,6 +1559,7 @@
         if (!response.ok) throw new Error(data.error || `提交失败：${response.status}`);
         const savedAt = data.created_at ? new Date(data.created_at).toLocaleString("zh-CN", { hour12: false }) : "刚刚";
         setSaveStatus(`已提交保存给顾问：${savedAt}`, "success");
+        showSubmittedResult(buildMarkdown(), `已提交保存给顾问：${savedAt}。这份可视化结果也会同步显示在顾问工作台。`);
         button.textContent = "已保存给顾问";
         showToast("已提交保存给顾问");
         setTimeout(() => {

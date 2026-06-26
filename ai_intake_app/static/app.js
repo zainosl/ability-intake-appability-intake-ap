@@ -362,7 +362,7 @@ async function loadDeliverableSubmissions() {
       <article class="deliverable-submission-card">
         <strong>${escapeHtml(item.client_name || "未命名用户")} · ${escapeHtml(item.title || "商业方向偏好与约束表")}</strong>
         <span>最新提交 · ${formatDate(item.created_at)} · 提交 ID ${item.id}</span>
-        <pre>${escapeHtml(markdownPreview(item.markdown))}</pre>
+        ${renderCommercialPreferencePreview(item.markdown)}
         <div class="deliverable-submission-actions">
           <button type="button" data-copy-submission="${item.id}">复制完整 Markdown</button>
         </div>
@@ -383,6 +383,69 @@ function markdownPreview(markdown) {
   const text = String(markdown || "").trim();
   if (!text) return "提交内容为空。";
   return text.length > 1200 ? `${text.slice(0, 1200)}\n\n...` : text;
+}
+
+function parseCommercialPreferenceMarkdown(markdown) {
+  const lines = String(markdown || "").split(/\r?\n/).filter((line) => line.trim().startsWith("|"));
+  if (lines.length < 4) return null;
+  const splitRow = (line) => line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+  const header = splitRow(lines[0]).slice(1);
+  const pref = splitRow(lines.find((line) => line.includes("| 偏好 |")) || "").slice(1);
+  const cons = splitRow(lines.find((line) => line.includes("| 约束 |")) || "").slice(1);
+  if (!header.length) return null;
+  return header.map((title, index) => ({
+    title,
+    preference: pref[index] || "未填写",
+    constraint: cons[index] || "未填写",
+  }));
+}
+
+function compactCommercialText(text, max = 145) {
+  const clean = String(text || "")
+    .replace(/<br\s*\/?>/g, "；")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!clean || clean === "未填写") return "未填写";
+  return clean.length > max ? `${clean.slice(0, max)}...` : clean;
+}
+
+function renderCommercialPreferencePreview(markdown) {
+  const items = parseCommercialPreferenceMarkdown(markdown);
+  if (!items) {
+    return `<pre>${escapeHtml(markdownPreview(markdown))}</pre>`;
+  }
+  const filled = items.filter((item) => item.preference !== "未填写" || item.constraint !== "未填写").length;
+  const signalItems = items
+    .filter((item) => item.preference !== "未填写")
+    .slice(0, 4)
+    .map((item) => `<li><b>${escapeHtml(item.title)}</b><span>${escapeHtml(compactCommercialText(item.preference, 110))}</span></li>`)
+    .join("");
+  return `
+    <div class="commercial-preview">
+      <div class="commercial-preview-hero">
+        <p class="eyebrow">商业方向偏好与约束结果</p>
+        <h4>轻验证、低压力、产品化优先</h4>
+        <span>${filled}/${items.length} 类已填写。先看边界，再收敛第二步商业切口。</span>
+      </div>
+      <div class="commercial-signal-list">
+        ${signalItems || "<p>还没有可展示的偏好信号。</p>"}
+      </div>
+      <div class="commercial-matrix">
+        ${items.map((item) => `
+          <section>
+            <strong>${escapeHtml(item.title)}</strong>
+            <p><b>偏好</b>${escapeHtml(compactCommercialText(item.preference))}</p>
+            <p><b>约束</b>${escapeHtml(compactCommercialText(item.constraint))}</p>
+          </section>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 async function copySubmissionMarkdown(markdown) {
