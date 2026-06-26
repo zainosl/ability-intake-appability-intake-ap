@@ -17,6 +17,31 @@ const MANUAL_TASK_HINTS = {
 };
 
 const ZHANGLU_DELIVERABLE_ID = "zhanglu-business-preference-constraints";
+const BOUND_DELIVERABLES = [
+  {
+    matchName: "张麓",
+    eyebrow: "张麓 · 第一步交付物",
+    title: "阶段结果入口",
+    links: [
+      { label: "交付物共创校准工作台", href: "/static/deliverables/zhanglu-co-creation-workbench.html", target: "_blank" },
+      { label: "下载共创校准 Markdown", href: "/static/deliverables/zhanglu-co-creation-materials.md", download: true },
+      { label: "能力资产诊断最终交付", href: "/static/deliverables/zhanglu-ability-assets-final-workbench.html", target: "_blank" },
+      { label: "商业方向偏好与约束表", href: "/static/deliverables/zhanglu-business-preference-constraints.html", target: "_blank" },
+    ],
+  },
+  {
+    matchName: "梁焱",
+    eyebrow: "梁焱 · 第一步交付物",
+    title: "能力资产假设校准完整证据版",
+    links: [
+      {
+        label: "第一步能力资产假设校准完整证据版",
+        href: "/static/deliverables/liangyan-ability-asset-hypothesis-evidence-workbench.html",
+        target: "_blank",
+      },
+    ],
+  },
+];
 
 const el = (id) => document.getElementById(id);
 
@@ -402,18 +427,36 @@ function shouldShowZhangluDeliverables() {
   return name.replace(/\s/g, "").includes("张麓");
 }
 
+function currentBoundDeliverable() {
+  const name = (currentSession?.session?.client_name || "").replace(/\s/g, "");
+  return BOUND_DELIVERABLES.find((item) => name.includes(item.matchName));
+}
+
 async function renderBoundDeliverables() {
-  const shouldShow = shouldShowZhangluDeliverables();
-  const strip = el("zhangluDeliverableStrip");
+  const deliverable = currentBoundDeliverable();
+  const strip = el("boundDeliverableStrip");
+  const links = el("boundDeliverableLinks");
   const panel = el("zhangluSubmissionPanel");
-  if (strip) strip.hidden = !shouldShow;
-  if (panel) panel.hidden = !shouldShow;
-  if (!shouldShow) {
+  if (strip) strip.hidden = !deliverable;
+  if (links) links.innerHTML = "";
+  if (panel) panel.hidden = !shouldShowZhangluDeliverables();
+  if (!deliverable) {
     const list = el("deliverableSubmissionsList");
     if (list) list.textContent = "";
     return;
   }
-  await loadDeliverableSubmissions();
+  el("boundDeliverableEyebrow").textContent = deliverable.eyebrow;
+  el("boundDeliverableTitle").textContent = deliverable.title;
+  if (links) {
+    links.innerHTML = deliverable.links.map((link) => {
+      const target = link.target ? ` target="${link.target}" rel="noopener"` : "";
+      const download = link.download ? " download" : "";
+      return `<a href="${escapeHtml(link.href)}"${target}${download}>${escapeHtml(link.label)}</a>`;
+    }).join("");
+  }
+  if (shouldShowZhangluDeliverables()) {
+    await loadDeliverableSubmissions();
+  }
 }
 
 function renderClientLink(sessionId) {
@@ -1245,7 +1288,8 @@ function clearCurrent() {
   }
   el("report").className = "report empty";
   el("report").textContent = "还没有生成材料整理包或审阅材料。请先完成第一步上传材料，再点击“整理材料”。";
-  el("zhangluDeliverableStrip").hidden = true;
+  el("boundDeliverableStrip").hidden = true;
+  el("boundDeliverableLinks").innerHTML = "";
   el("zhangluSubmissionPanel").hidden = true;
   el("deliverableSubmissionsList").textContent = "";
   showFeedback("", "info");

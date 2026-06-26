@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梁焱：第一步能力资产假设校准工作台</title>
+  <style>
+    :root {
+      --bg: #0b0d0f;
+      --panel: rgba(20, 23, 27, .94);
+      --panel2: rgba(29, 33, 39, .9);
+      --ink: #f6f7f8;
+      --muted: #aab2bd;
+      --dim: #737d89;
+      --line: rgba(255,255,255,.1);
+      --line2: rgba(255,255,255,.18);
+      --green: #5ee0bd;
+      --green2: rgba(94,224,189,.11);
+      --gold: #f2bc70;
+      --gold2: rgba(242,188,112,.12);
+      --blue: #7fb4ff;
+      --blue2: rgba(127,180,255,.12);
+      --red: #ef7d82;
+      --red2: rgba(239,125,130,.12);
+      --radius: 6px;
+      --shadow: 0 24px 80px rgba(0,0,0,.36);
+      --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.68;
+      letter-spacing: 0;
+      background:
+        linear-gradient(rgba(94,224,189,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(94,224,189,.03) 1px, transparent 1px),
+        var(--bg);
+      background-size: 56px 56px;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(11,13,15,.18), rgba(11,13,15,.94) 70%, #0b0d0f);
+    }
+    .shell { display: grid; grid-template-columns: 292px minmax(0, 1fr); min-height: 100vh; }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 26px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(11,13,15,.84);
+      backdrop-filter: blur(18px);
+    }
+    .brand { padding: 0 4px 14px; border-bottom: 1px solid var(--line); }
+    .brand h1 { margin: 0 0 8px; font-size: 22px; line-height: 1.2; }
+    .brand p { margin: 0; color: var(--dim); font-size: 12px; }
+    nav { display: grid; gap: 4px; margin-top: 14px; }
+    nav a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 3px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+    nav a.sub { padding-left: 20px; font-size: 12px; color: var(--dim); }
+    nav a:hover { color: var(--green); border-color: rgba(94,224,189,.28); background: var(--green2); }
+    main { width: 100%; max-width: 1320px; padding: 44px clamp(20px, 5vw, 72px) 88px; }
+    .doc { padding: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(20,23,27,.84); box-shadow: var(--shadow); }
+    .head { display: flex; justify-content: space-between; gap: 18px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .head h1 { margin: 0 0 10px; font-size: clamp(30px, 4vw, 50px); line-height: 1.1; }
+    .head p { margin: 0; color: var(--muted); max-width: 760px; }
+    .pills { display: flex; align-items: flex-start; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      display: inline-flex;
+      min-height: 26px;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(94,224,189,.3);
+      background: var(--green2);
+      color: var(--green);
+      font-size: 12px;
+      white-space: nowrap;
+      font-weight: 750;
+    }
+    .link-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(127,180,255,.34);
+      background: var(--blue2);
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .doc-link:hover { border-color: rgba(127,180,255,.58); background: rgba(127,180,255,.18); }
+    h2 { margin: 42px 0 14px; padding-top: 18px; border-top: 1px solid var(--line); font-size: clamp(25px, 3vw, 36px); line-height: 1.18; }
+    h3 { margin: 28px 0 11px; color: var(--green); font-size: 20px; line-height: 1.35; }
+    h4 { margin: 18px 0 8px; color: var(--muted); font-size: 14px; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 23px; }
+    li { margin: 5px 0; }
+    blockquote {
+      margin: 14px 0;
+      padding: 14px 16px;
+      border-left: 3px solid var(--green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--green2);
+      font-weight: 700;
+    }
+    .note {
+      margin: 16px 0 22px;
+      padding: 15px 17px;
+      border: 1px solid rgba(242,188,112,.3);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius);
+      background: var(--gold2);
+    }
+    .note strong { display: block; color: var(--gold); margin-bottom: 5px; }
+    .grid { display: grid; gap: 14px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card {
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel2);
+    }
+    .card strong { display: block; margin-bottom: 5px; color: var(--ink); }
+    .card span { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 23px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--line2);
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    .tag.hyp { color: var(--gold); border-color: rgba(242,188,112,.34); background: var(--gold2); }
+    .tag.evd { color: var(--blue); border-color: rgba(127,180,255,.34); background: var(--blue2); }
+    .tag.ask { color: var(--green); border-color: rgba(94,224,189,.34); background: var(--green2); }
+    .table-wrap { margin: 14px 0 18px; overflow-x: auto; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(20,23,27,.82); }
+    th, td { min-width: 116px; padding: 10px 11px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--green); background: rgba(94,224,189,.08); text-align: left; font-size: 12px; }
+    td { color: var(--ink); }
+    td:last-child, th:last-child { border-right: 0; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) td { background: rgba(255,255,255,.025); }
+    .flow { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+    .flow div { position: relative; flex: 1 1 150px; min-width: 140px; padding: 11px 12px; border-radius: var(--radius); border: 1px solid rgba(94,224,189,.28); background: var(--green2); }
+    .flow div::after { content: "→"; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); color: var(--green); font-weight: 900; }
+    .flow div:last-child::after { content: ""; }
+    .flow strong { display: block; color: var(--green); font-size: 12px; }
+    .matrix { display: grid; grid-template-columns: 150px 1fr 1fr; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin: 14px 0 22px; }
+    .cell { min-height: 104px; padding: 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(20,23,27,.75); }
+    .cell:nth-child(3n) { border-right: 0; }
+    .cell:nth-last-child(-n+3) { border-bottom: 0; }
+    .axis { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--green); background: rgba(94,224,189,.08); font-size: 12px; font-weight: 800; }
+    .selected { background: rgba(242,188,112,.11); box-shadow: inset 0 0 0 2px rgba(242,188,112,.32); }
+    .marker { display: inline-flex; margin-top: 8px; padding: 3px 8px; border-radius: 999px; color: #17100a; background: var(--gold); font-size: 12px; font-weight: 900; }
+    .asset-liability { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: 18px 0 22px; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: rgba(20,23,27,.78); }
+    .panel h3 { margin: 0; padding: 13px 16px; font-size: 16px; }
+    .panel.assets { border-color: rgba(94,224,189,.28); }
+    .panel.liabilities { border-color: rgba(239,125,130,.28); }
+    .panel.assets h3 { background: var(--green2); color: var(--green); }
+    .panel.liabilities h3 { background: var(--red2); color: var(--red); }
+    .panel ul { list-style: none; margin: 0; padding: 12px 14px 14px; }
+    .panel li { margin: 8px 0; padding: 10px 11px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.035); }
+    .panel li strong { display: block; margin-bottom: 2px; }
+    .panel li span { display: block; color: var(--muted); font-size: 13px; line-height: 1.48; }
+    .question-list li { padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .question-list li:last-child { border-bottom: 0; }
+    @media (max-width: 980px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      main { padding: 16px; }
+      .doc { padding: 20px; }
+      .head { display: block; }
+      .pills { justify-content: flex-start; margin-top: 12px; }
+      .grid.two, .grid.three, .asset-liability { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .matrix { grid-template-columns: 1fr; }
+      .axis.empty { display: none; }
+      .cell { border-right: 0; }
+    }
+    @media print {
+      aside { display: none; }
+      .shell { display: block; }
+      body { background: #fff; color: #111; }
+      main { max-width: none; padding: 0; }
+      .doc { box-shadow: none; border: 0; }
+      h2, h3, table, .card, .panel { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <h1>能力校准工作台</h1>
+        <p>梁焱第一步：全部结论均为会前假设，等待一对一共创校准。</p>
+      </div>
+      <nav>
+        <a href="#intro">0. 使用方式</a>
+        <a href="#evidence">1. 证据地图</a>
+        <a href="#position">2. 初步定位假设</a>
+        <a href="#core">3. 核心能力假设</a>
+        <a class="sub" href="#a">A. 复杂交易证据链</a>
+        <a class="sub" href="#b">B. 财务经营系统搭建</a>
+        <a class="sub" href="#c">C. 商业价值转译表达</a>
+        <a class="sub" href="#d">D. 热爱型产品运营</a>
+        <a class="sub" href="#e">E. 真实体验内容沉淀</a>
+        <a href="#knowledge">4. 认知资产假设</a>
+        <a href="#balance">5. 资产负债假设</a>
+        <a href="#questions">6. 一对一校准问题</a>
+        <a href="#next">7. 第二步输入</a>
+      </nav>
+    </aside>
+    <main>
+      <section class="doc">
+        <div class="head">
+          <div>
+            <h1>梁焱：第一步能力资产假设校准工作台</h1>
+            <p>这不是最终诊断报告，而是一份会前假设工作台。当前 HTML 是会中快速浏览版；完整证据链、能力生成逻辑、A/B/C/L 暂定等级、P0/P1/P2 负债和会后收敛模板，已沉淀在 Markdown 完整材料里。</p>
+            <div class="link-row">
+              <a class="doc-link" href="./梁焱-第一步能力资产假设校准完整证据版.html">查看完整 HTML 证据版</a>
+              <a class="doc-link" href="./梁焱-第一步能力资产假设校准材料.md">查看 Markdown 原稿</a>
+            </div>
+          </div>
+          <div class="pills">
+            <span class="pill">假设版</span>
+            <span class="pill">待真人校准</span>
+            <span class="pill">第一步能力资产诊断</span>
+          </div>
+        </div>
+
+        <section id="intro">
+          <h2>0. 使用方式</h2>
+          <div class="note">
+            <strong>主持原则</strong>
+            这份工作台里的所有能力命名都先按“候选”处理。会中不要急着证明它们都成立，而是逐项问：这是不是你真实反复做过的动作？它能不能离开原岗位、原平台、原关系成立？你愿不愿意长期把它拿出来服务别人？
+          </div>
+          <div class="flow">
+            <div><strong>01</strong><span>先看证据</span></div>
+            <div><strong>02</strong><span>确认能力是否成立</span></div>
+            <div><strong>03</strong><span>拆平台与个人归因</span></div>
+            <div><strong>04</strong><span>判断能量与边界</span></div>
+            <div><strong>05</strong><span>收敛第二步输入</span></div>
+          </div>
+          <blockquote>会中的目标不是让梁焱接受这份判断，而是让她在确认、反驳和补证据的过程中，看清哪些能力真的属于自己。</blockquote>
+        </section>
+
+        <section id="evidence">
+          <h2>1. 证据地图</h2>
+          <p>梁焱的材料不是单一履历，而是“职业硬证据 + 近期跨界实践 + 内容表达 + 价值观线索”的组合。第一步要避免只被强履历吸引，也不能把户外与公众号仅当作爱好材料。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>证据层</th><th>材料来源</th><th>主要能证明什么</th><th>会中要警惕什么</th></tr></thead>
+              <tbody>
+                <tr><td>职业硬证据</td><td>简历：安永审计经理、财务总监、CFO兼董秘、财务咨询合伙人、投资集团事业合伙人</td><td>复杂财务、审计、融资、投后、跨境并购、上市、项目管理和经营分析能力强</td><td>职位光环、公司平台、团队资源和行业窗口期不能直接等同于个人可带走能力</td></tr>
+                <tr><td>专业案例证据</td><td>跨国并购卖方CFO实战、税务合规框架、AI大会商业化宣讲</td><td>能把专业能力转成交易结果、合规结构和外部表达</td><td>需要确认她本人在关键判断、关键谈判和结构设计中的实际贡献比例</td></tr>
+                <tr><td>跨界实践证据</td><td>从财务总监到户外领队、如何运营一场不亏钱的户外活动、做活动的精益创业</td><td>财务和商业能力能迁移到低资源、小闭环、强体验的活动场景</td><td>要确认这是可持续能力资产，还是阶段性兴趣驱动下的高投入表现</td></tr>
+                <tr><td>内容表达证据</td><td>按时出摊、持续表达；热爱变现、商业闭环、活动复盘、越野跑和团队文章</td><td>能把经历沉淀成观点、方法、案例和个人窗口</td><td>目前内容更像自我整理和同频筛选，是否能转成稳定获客与付费信任还未知</td></tr>
+                <tr><td>价值观线索</td><td>纯粹、初心、真实感受、边界感、圈子不同不必强融、长期主义</td><td>能形成清晰服务气质、筛选机制和用户体验标准</td><td>价值观也可能缩窄商业选择，甚至让她抗拒某些必要销售动作</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="position">
+          <h2>2. 初步定位假设</h2>
+          <h3>2.1 能力资产强度 × 独立商业闭环证据</h3>
+          <div class="matrix">
+            <div class="cell axis empty"></div>
+            <div class="cell axis">独立商业闭环证据弱</div>
+            <div class="cell axis">独立商业闭环证据强</div>
+            <div class="cell axis">能力资产强</div>
+            <div class="cell selected"><strong>高资产待拆分区</strong><span>履历、案例和近期跨界材料都很强，但要拆清哪些是专业能力，哪些是独立服务能力。</span><span class="marker">当前假设落位</span></div>
+            <div class="cell"><strong>优势确认区</strong><span>既有强能力，也有离开平台后稳定获得客户、报价、交付和复购的证据。</span></div>
+            <div class="cell axis">能力资产弱</div>
+            <div class="cell"><strong>暂缓判断区</strong><span>材料不足，不适合开场判断。</span></div>
+            <div class="cell"><strong>结果反推区</strong><span>有商业结果，但需要反查真实能力来源。</span></div>
+          </div>
+
+          <h3>2.2 个人归因强度 × 平台依赖强度</h3>
+          <div class="matrix">
+            <div class="cell axis empty"></div>
+            <div class="cell axis">平台依赖低</div>
+            <div class="cell axis">平台依赖高</div>
+            <div class="cell axis">个人归因强</div>
+            <div class="cell"><strong>独立可迁移区</strong><span>个人动作、判断和成果都清楚，离开原组织后也能成立。</span></div>
+            <div class="cell selected"><strong>强个人贡献待剥离区</strong><span>个人能力很可能强，但要拆职位、公司、团队、资源和专业牌照的贡献。</span><span class="marker">当前假设落位</span></div>
+            <div class="cell axis">个人归因弱</div>
+            <div class="cell"><strong>证据不足区</strong><span>个人贡献和外部条件都不清楚。</span></div>
+            <div class="cell"><strong>平台资产区</strong><span>结果主要来自平台资源、职位授权或组织能力。</span></div>
+          </div>
+          <blockquote>初步判断：梁焱不是“能力不够”的问题，而是“能力资产很强，但需要把职业平台资产、个人专业资产、跨界产品资产和未来可售卖资产拆开”。</blockquote>
+        </section>
+
+        <section id="core">
+          <h2>3. 核心能力假设</h2>
+          <p>目前最值得带进一对一校准的上位假设是：</p>
+          <blockquote>梁焱可能擅长把复杂、不确定、风险高的事情，转成有证据链、有结构、有边界、能被人理解并愿意参与的行动系统。</blockquote>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>能力簇来源</th><th>支撑核心假设的部分</th><th>当前状态</th></tr></thead>
+              <tbody>
+                <tr><td>复杂交易与财务证据链构建</td><td>把混乱账目、估值、尽调、交割和谈判转成可被各方接受的证据链</td><td><span class="tag hyp">高可信假设</span></td></tr>
+                <tr><td>财务经营系统搭建</td><td>把记账型财务升级成预算、BP、经营分析、现金流和战略支持系统</td><td><span class="tag hyp">高可信假设</span></td></tr>
+                <tr><td>商业价值转译与表达</td><td>能从财务/商业视角把技术、项目、活动或人生经验转成别人听得懂的价值</td><td><span class="tag hyp">待校准假设</span></td></tr>
+                <tr><td>热爱型产品的构建、销售和运营</td><td>能用产品、销售、运营、财务四个环节经营户外活动，并保持体验质量</td><td><span class="tag hyp">待校准假设</span></td></tr>
+                <tr><td>真实体验的内容沉淀与人群筛选</td><td>通过文章持续表达、复盘、筛选同频者，并让经历成为未来商业线索</td><td><span class="tag hyp">待外部验证</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <article id="a">
+            <h3>能力簇 A：复杂交易与财务证据链构建</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>假设</th><th>证据线索</th><th>待校准问题</th></tr></thead>
+                <tbody>
+                  <tr><td>她能在高风险交易里搭建清晰的财务事实、估值逻辑和交割依据。</td><td>跨国并购卖方CFO案例：清账、估值模型、引入安永、管理尽调、设计交割底稿；简历中有跨境并购、投融资、上市和审计背景。</td><td>这些关键动作中，哪些是她独立判断？哪些来自安永、律师、买方流程或同学企业家的授权？</td></tr>
+                  <tr><td>她的专业价值不只是“会算账”，而是让复杂交易变得可谈、可信、可交割。</td><td>她在文章中强调“专业是最大筹码”“财务的终点是无可争议”。</td><td>这种能力是否能迁移到中小企业、个人顾问或非资本市场场景？</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>会中重点</h4>
+            <ul class="question-list">
+              <li>如果没有四大、CFO身份、老同学信任和外部顾问团队，你还能独立完成其中哪几部分？</li>
+              <li>你最有把握交付的是清账、估值、交易结构、谈判陪跑、尽调管理，还是交割机制？</li>
+              <li>这项能力你愿意长期卖给企业客户吗？还是只愿意作为高端项目机会承接？</li>
+            </ul>
+          </article>
+
+          <article id="b">
+            <h3>能力簇 B：从财务后台到经营系统的搭建能力</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>假设</th><th>证据线索</th><th>待校准问题</th></tr></thead>
+                <tbody>
+                  <tr><td>她能把财务从核算支持升级为经营决策系统。</td><td>德比软件：从0到1搭建全面预算、滚动预测、KPI、经营分析和财务BP团队；现金流增量1000万美元；全球税筹和法人架构。</td><td>这些体系设计中，哪些是她的方法论，哪些是成熟公司治理模板？</td></tr>
+                  <tr><td>她理解“中后台能力如何赋能业务”，不只是财务专业执行者。</td><td>百姓网CFO兼董秘：投后管理、股东沟通、国资退出、战略投资人引入、退税、法务欠款追回。</td><td>她最强的是经营分析、利益相关方沟通、投后退出，还是组织内资源协调？</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>会中重点</h4>
+            <ul class="question-list">
+              <li>如果服务一家混乱增长期公司，你第一周会先看哪三张表、问哪五个问题？</li>
+              <li>你是否已经有可复用的“财务功能重塑步骤”？能否拆成3-5个阶段？</li>
+              <li>你更享受搭系统，还是更享受交易、谈判和关键节点攻坚？</li>
+            </ul>
+          </article>
+
+          <article id="c">
+            <h3>能力簇 C：商业价值转译与外部表达</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>假设</th><th>证据线索</th><th>待校准问题</th></tr></thead>
+                <tbody>
+                  <tr><td>她能把技术、财务、活动和人生经验转成非专业听众可理解的商业价值。</td><td>智谱AI大会：临时代表公司讲产品，从技术叙事切换到商业化结果，获得最佳人气奖；高顿预算课程、混沌创新教练。</td><td>这是稳定表达能力，还是特定场合下的临场发挥？</td></tr>
+                  <tr><td>她能把自己的经历写成方法、观点和案例，形成个人窗口。</td><td>公众号从日记转向复盘、方法论和经验总结；“按时出摊，持续表达”带来跨界转型者关注。</td><td>内容目前更多是自我整理，还是已经产生具体合作、咨询、付费机会？</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>会中重点</h4>
+            <ul class="question-list">
+              <li>别人听你讲之后，最常反馈你“厉害”的点是什么：专业、清晰、真实、鼓舞，还是能落地？</li>
+              <li>你是否愿意把表达变成获客动作？还是只希望它自然筛选同频者？</li>
+              <li>你更适合公开演讲、文章、课程、咨询桌面沟通，还是项目制汇报？</li>
+            </ul>
+          </article>
+
+          <article id="d">
+            <h3>能力簇 D：热爱型产品的构建、销售和运营</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>假设</th><th>证据线索</th><th>待校准问题</th></tr></thead>
+                <tbody>
+                  <tr><td>她能把热爱转成一个可运营、可定价、可控成本、可交付体验的小型产品。</td><td>户外领队半年多，开8条线路且成行盈利；“如何运营一场不亏钱的户外活动”中有预算、保本点、固定成本转变、联合分摊、主动推广和二次议价。</td><td>盈利是偶发结果、俱乐部平台结果，还是她自己的产品运营能力？</td></tr>
+                  <tr><td>她的产品判断来自真实体验和用户共感，而不只是KPI或表格。</td><td>“好产品不是KPI压出来的，是心动出来的”“只开自己心动的线路”“领队是协调人而非保姆”。</td><td>这种“心动选品”能否稳定复制？对别人是否可教、可迁移？</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>会中重点</h4>
+            <ul class="question-list">
+              <li>你做爆款线路时，真正的判断步骤是什么？能否把“心动”拆成可观察变量？</li>
+              <li>活动盈利里，个人贡献、俱乐部品牌、线路资源、朋友圈资源分别占几成？</li>
+              <li>你愿意把“户外活动产品化”作为商业方向吗？还是它只能作为能力迁移证据？</li>
+            </ul>
+          </article>
+
+          <article id="e">
+            <h3>能力簇 E：真实体验的内容沉淀与人群筛选</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>假设</th><th>证据线索</th><th>待校准问题</th></tr></thead>
+                <tbody>
+                  <tr><td>她能持续把经历、行动和价值观沉淀成内容资产。</td><td>公众号持续输出，从记录琐事转向月度复盘、比赛复盘、活动运营方法、商业闭环观察。</td><td>这种输出是否稳定？是否依赖状态、灵感和山野补能？</td></tr>
+                  <tr><td>她的内容能筛选同频人群，并可能成为未来商业线索入口。</td><td>《从财务总监到户外领队》推流后吸引跨界转行、追寻热爱的人加微信留言。</td><td>这些人只是情绪共鸣，还是有明确问题和付费意愿？</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h4>会中重点</h4>
+            <ul class="question-list">
+              <li>你最想通过内容吸引谁？企业主、财务人、跨界转型者、户外爱好者，还是想热爱变现的人？</li>
+              <li>你愿意从内容自然转向私聊、诊断、报价吗？哪一步最别扭？</li>
+              <li>内容对你是表达窗口、知识仓库、获客渠道，还是自我确认工具？优先级怎么排？</li>
+            </ul>
+          </article>
+        </section>
+
+        <section id="knowledge">
+          <h2>4. 认知资产假设</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>层级</th><th>梁焱可能拥有的认知资产</th><th>当前理解</th><th>校准重点</th></tr></thead>
+              <tbody>
+                <tr><td>方法论</td><td>清账-估值-谈判-交割证据链；财务经营系统搭建；活动盈亏平衡设计；热爱型产品选品；内容复盘沉淀</td><td>已有多个可命名的方法雏形，尤其财务和活动运营两端较清楚</td><td>哪些方法能拆成步骤教给别人，哪些只是她本人经验感？</td></tr>
+                <tr><td>思维模型</td><td>先清事实再定价；专业团队对等博弈；财务支持业务；初心决定动作是否变形；小闭环补齐商业短板；圈子不同不必强融</td><td>专业判断和价值判断交织很强</td><td>商业化时哪些模型能创造价值，哪些会变成筛选边界？</td></tr>
+                <tr><td>元认知</td><td>能复盘自己的跨界、恐惧、能量、短视频消耗、运动短板和身份变化</td><td>自我观察能力强，能把经历转成观点</td><td>这种复盘能否稳定服务他人，而不只是服务自己？</td></tr>
+                <tr><td>证据观</td><td>重账目、模型、底稿、数据口径、经营事实、成本结构和真实反馈</td><td>这是财务背景带来的强底层优势</td><td>是否能把证据观翻译给非财务用户，不让对方觉得过硬或过重？</td></tr>
+                <tr><td>人文理解</td><td>理解热爱、纯粹、长期主义、团队氛围、女性山野体验、成年人边界感和同频关系</td><td>她不只是理性财务人，也有较强体验和关系感知</td><td>这能否成为服务差异化，而不是只停留在文章气质？</td></tr>
+                <tr><td>价值观</td><td>真实、纯粹、长期、边界、主动、做自己相信的东西、拒绝动作变形</td><td>价值观非常清晰，能成为品牌气质</td><td>它会支持商业化，还是限制销售、规模和妥协空间？</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="balance">
+          <h2>5. 资产负债假设</h2>
+          <div class="asset-liability">
+            <section class="panel assets">
+              <h3>资产侧候选</h3>
+              <ul>
+                <li><strong>复杂交易证据链能力</strong><span>能把混乱财务、估值、尽调、交易和交割问题变成可判断、可谈判、可落地的结构。</span></li>
+                <li><strong>经营财务系统搭建能力</strong><span>能从核算、预算、经营分析、BP、现金流和税筹层面支持业务决策。</span></li>
+                <li><strong>商业价值转译能力</strong><span>能把技术、财务、活动或人生经验翻译成外部听得懂的商业价值。</span></li>
+                <li><strong>小型产品闭环运营能力</strong><span>户外活动里显现出选品、定价、招募、成本控制、交付和复盘能力。</span></li>
+                <li><strong>内容沉淀与同频筛选能力</strong><span>能持续把经历转成文章、观点和方法，并让别人通过内容理解她。</span></li>
+                <li><strong>价值观与边界资产</strong><span>真实、纯粹、长期、边界感强，适合形成清晰的服务选择标准。</span></li>
+              </ul>
+            </section>
+            <section class="panel liabilities">
+              <h3>负债侧候选</h3>
+              <ul>
+                <li><strong>平台与职位归因未拆清</strong><span>强履历可能来自职位授权、公司平台、团队资源和专业资质，不能直接等同于独立服务资产。</span></li>
+                <li><strong>方向分叉过多</strong><span>CFO顾问、热爱变现、户外产品、内容表达、商业闭环方法都可能成立，但短期必须收敛。</span></li>
+                <li><strong>价值观过强导致商业动作变窄</strong><span>她强调纯粹、真实、发心，可能天然抗拒某些销售、放大和标准化动作。</span></li>
+                <li><strong>专业表达可能过重</strong><span>财务、并购、上市经验门槛高，面向非专业用户时需要转译为明确结果。</span></li>
+                <li><strong>内容到成交链路不足</strong><span>公众号已有关注和共鸣，但还未证明能稳定转成付费诊断、项目或咨询。</span></li>
+                <li><strong>热爱型产品的可复制性待证</strong><span>户外活动成功可能强依赖个人体验、圈层和当期状态，是否能教给别人或变成服务仍需校准。</span></li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section id="questions">
+          <h2>6. 一对一校准问题</h2>
+          <h3>6.1 开场校准</h3>
+          <ol class="question-list">
+            <li>你看到“复杂事情转成有证据链、有结构、有边界、能被人理解并愿意参与的行动系统”这个描述，哪里像你，哪里不像？</li>
+            <li>如果只保留三个你最想被别人购买的能力，你会保留哪三个？为什么？</li>
+            <li>哪些能力你承认自己很强，但并不想长期卖？</li>
+          </ol>
+
+          <h3>6.2 平台剥离</h3>
+          <ol class="question-list">
+            <li>跨国并购、融资、投后、上市这些成果里，个人、团队、公司平台、外部顾问、行业机会分别占几成？</li>
+            <li>如果明天离开所有组织身份，只保留你的经验和人脉，你最能独立交付的一项服务是什么？</li>
+            <li>别人真正会因为你本人付费，而不是因为你曾经的title付费的点是什么？</li>
+          </ol>
+
+          <h3>6.3 能量与边界</h3>
+          <ol class="question-list">
+            <li>你做财务专业项目、户外活动、内容写作、商业闭环观察时，哪一种最给你能量？哪一种最消耗？</li>
+            <li>你最不想服务什么样的客户？最不想进入什么样的合作关系？</li>
+            <li>你对销售动作的边界是什么：公开表达可以、私聊推荐可以、报价可以、持续跟进可以吗？哪一步最难？</li>
+          </ol>
+
+          <h3>6.4 第二步准备</h3>
+          <ol class="question-list">
+            <li>未来3个月，你更想验证企业财务顾问方向，还是个人热爱变现/商业闭环方向？</li>
+            <li>你手上现在能触达的10-20个潜在付费对象是谁？他们更可能为什么问题找你？</li>
+            <li>如果设计一个最低风险的收费试点，你愿意先卖什么：一次诊断、一份方案、一次陪跑，还是一个项目节点？</li>
+          </ol>
+        </section>
+
+        <section id="next">
+          <h2>7. 第二步输入假设</h2>
+          <p>一对一校准后，不需要马上定最终商业方向。第二步只需要把值得进入商业切口收敛的能力池整理出来。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>候选能力</th><th>可能商业切口</th><th>优先校准风险</th></tr></thead>
+              <tbody>
+                <tr><td>复杂交易与财务证据链</td><td>中小企业并购/融资/上市前财务诊断，交易前财务体检，CFO项目顾问</td><td>客源、信任门槛、项目周期过重、是否愿意继续做高强度B端项目</td></tr>
+                <tr><td>经营财务系统搭建</td><td>成长型企业财务BP体系、预算管理、经营分析和现金流治理咨询</td><td>交付边界、定价方式、企业客户获取、标准化难度</td></tr>
+                <tr><td>商业价值转译表达</td><td>技术/专业团队商业化叙事辅导，路演材料打磨，商业表达训练</td><td>案例证明不足，是否能从个人临场能力变成可交付服务</td></tr>
+                <tr><td>热爱型产品闭环运营</td><td>热爱变现诊断，小型活动产品设计，个人事业小闭环陪跑</td><td>目标用户付费意愿、她是否愿意服务个人、方法可复制性</td></tr>
+                <tr><td>内容沉淀与人群筛选</td><td>专业人士公众号定位、经验方法论萃取、个人能力资产表达</td><td>内容到成交链路、结果定义、是否愿意高频输出和主动转化</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note">
+            <strong>会后收敛动作</strong>
+            一对一结束后，把每个能力簇改成三种状态之一：确认成立、保留观察、暂不成立。只有“确认成立”和少数“保留观察”的能力进入第二步商业切口收敛。
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

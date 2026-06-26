@@ -9,8 +9,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>能力资产诊断 · AI 前置采集</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260626profile" />
-    <link rel="stylesheet" href="styles.css?v=20260626profile" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260626liangyan" />
+    <link rel="stylesheet" href="styles.css?v=20260626liangyan" />
   </head>
   <body>
     <div class="admin-gate" id="adminGate" hidden>
@@ -57,17 +57,12 @@
         </div>
       </section>
 
-      <section class="deliverable-strip" id="zhangluDeliverableStrip" aria-label="张麓交付物" hidden>
+      <section class="deliverable-strip" id="boundDeliverableStrip" aria-label="用户交付物" hidden>
         <div>
-          <p class="eyebrow">张麓 · 第一步交付物</p>
-          <h3>阶段结果入口</h3>
+          <p class="eyebrow" id="boundDeliverableEyebrow">用户 · 第一步交付物</p>
+          <h3 id="boundDeliverableTitle">阶段结果入口</h3>
         </div>
-        <div class="deliverable-links">
-          <a href="/static/deliverables/zhanglu-co-creation-workbench.html" target="_blank" rel="noopener">交付物共创校准工作台</a>
-          <a href="/static/deliverables/zhanglu-co-creation-materials.md" download>下载共创校准 Markdown</a>
-          <a href="/static/deliverables/zhanglu-ability-assets-final-workbench.html" target="_blank" rel="noopener">能力资产诊断最终交付</a>
-          <a href="/static/deliverables/zhanglu-business-preference-constraints.html" target="_blank" rel="noopener">商业方向偏好与约束表</a>
-        </div>
+        <div class="deliverable-links" id="boundDeliverableLinks"></div>
       </section>
 
       <section class="deliverable-submissions" id="zhangluSubmissionPanel" aria-label="张麓提交结果" hidden>
@@ -304,11 +299,11 @@
       <p id="busyText">处理中...</p>
     </dialog>
 
-    <script src="/static/app.js?v=20260626profile"></script>
+    <script src="/static/app.js?v=20260626liangyan"></script>
     <script>
       if (!window.__abilityIntakeLoaded) {
         const script = document.createElement("script");
-        script.src = "app.js?v=20260626profile";
+        script.src = "app.js?v=20260626liangyan";
         document.body.appendChild(script);
       }
     </script>
