@@ -359,6 +359,7 @@ function renderSession() {
   const s = currentSession.session;
   el("pageTitle").textContent = `${s.client_name} · 能力资产与认知资产诊断`;
   el("sessionStatus").textContent = s.status;
+  renderSessionForm();
   const downloadButton = el("downloadMarkdownBtn");
   if (downloadButton) downloadButton.disabled = false;
   renderClientLink(s.id);
@@ -369,6 +370,31 @@ function renderSession() {
   renderMaterialDecision();
   renderBoundDeliverables();
   renderNextStep();
+}
+
+function renderSessionForm() {
+  const form = el("sessionForm");
+  if (!form) return;
+  const submitButton = el("sessionSubmitBtn");
+  const note = el("sessionFormNote");
+  if (!currentSession) {
+    form.elements.client_name.value = "";
+    form.elements.contact.value = "";
+    form.elements.goal.value = "";
+    if (submitButton) submitButton.textContent = "创建诊断档案";
+    if (note) {
+      note.textContent = "先创建一个诊断档案，再把客户材料按三种方式放进来：文件、链接、补充文本。";
+    }
+    return;
+  }
+  const s = currentSession.session || {};
+  form.elements.client_name.value = s.client_name || "";
+  form.elements.contact.value = s.contact || "";
+  form.elements.goal.value = s.goal || "";
+  if (submitButton) submitButton.textContent = "保存档案信息";
+  if (note) {
+    note.textContent = "正在编辑当前诊断档案。修改姓名、联系方式或当前困惑后点击保存，不会影响已上传材料。";
+  }
 }
 
 function shouldShowZhangluDeliverables() {
@@ -949,18 +975,23 @@ async function createSession(e) {
   const formEl = e.currentTarget;
   const form = new FormData(formEl);
   const payload = Object.fromEntries(form.entries());
-  showBusy("创建诊断档案...");
+  const editingSessionId = currentSessionId;
+  showBusy(editingSessionId ? "保存档案信息..." : "创建诊断档案...");
   try {
-    const data = await api("/api/sessions", {
+    const data = await api(editingSessionId ? `/api/sessions/${editingSessionId}/profile` : "/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    formEl.reset();
-    await selectSession(data.id);
-    showFeedback("诊断档案已创建。现在可以上传三种材料：文件、链接、补充文本。", "success");
+    await selectSession(editingSessionId || data.id);
+    showFeedback(
+      editingSessionId
+        ? "档案信息已保存。你可以继续上传材料、整理材料或进入后续步骤。"
+        : "诊断档案已创建。现在可以上传三种材料：文件、链接、补充文本。",
+      "success"
+    );
   } catch (err) {
-    showFeedback(`创建失败：${err.message}`, "error");
+    showFeedback(`${editingSessionId ? "保存" : "创建"}失败：${err.message}`, "error");
   } finally {
     hideBusy();
   }
@@ -1201,6 +1232,7 @@ function clearCurrent() {
   currentSession = null;
   el("pageTitle").textContent = "能力资产与认知资产诊断";
   el("sessionStatus").textContent = "未开始";
+  renderSessionForm();
   el("fileList").innerHTML = "";
   el("savedCount").textContent = "0 份";
   el("clientLink").value = "";

@@ -9,8 +9,8 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>能力资产诊断 · AI 前置采集</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260626delete" />
-    <link rel="stylesheet" href="styles.css?v=20260626delete" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260626profile" />
+    <link rel="stylesheet" href="styles.css?v=20260626profile" />
   </head>
   <body>
     <div class="admin-gate" id="adminGate" hidden>
@@ -89,7 +89,7 @@
           </div>
 
           <form id="sessionForm" class="stack">
-            <div class="step-note">
+            <div id="sessionFormNote" class="step-note">
               先创建一个诊断档案，再把客户材料按三种方式放进来：文件、链接、补充文本。
             </div>
             <label>
@@ -104,7 +104,7 @@
               当前困惑
               <textarea name="goal" rows="4" placeholder="他为什么来做这次诊断？想弄清什么？"></textarea>
             </label>
-            <button class="primary" type="submit">创建诊断档案</button>
+            <button id="sessionSubmitBtn" class="primary" type="submit">创建诊断档案</button>
           </form>
           <div class="client-link-box">
             <strong>用户自助访谈链接</strong>
@@ -304,11 +304,11 @@
       <p id="busyText">处理中...</p>
     </dialog>
 
-    <script src="/static/app.js?v=20260626delete"></script>
+    <script src="/static/app.js?v=20260626profile"></script>
     <script>
       if (!window.__abilityIntakeLoaded) {
         const script = document.createElement("script");
-        script.src = "app.js?v=20260626delete";
+        script.src = "app.js?v=20260626profile";
         document.body.appendChild(script);
       }
     </script>

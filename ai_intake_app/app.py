@@ -1721,6 +1721,8 @@ class Handler(BaseHTTPRequestHandler):
                 session_id = int(parts[2])
                 if len(parts) == 4 and parts[3] == "restore":
                     return self.restore_session(session_id)
+                if len(parts) == 4 and parts[3] == "profile":
+                    return self.update_session_profile(session_id)
                 if len(parts) == 4 and parts[3] == "upload":
                     return self.upload(session_id)
                 if len(parts) == 4 and parts[3] == "message":
@@ -1815,13 +1817,33 @@ class Handler(BaseHTTPRequestHandler):
         name = (data.get("client_name") or "").strip()
         if not name:
             return self.json({"error": "client_name required"}, 400)
+        timestamp = now_iso()
         with db() as conn:
             cur = conn.execute(
                 "INSERT INTO sessions(client_name, contact, goal, status, created_at, updated_at) VALUES(?,?,?,?,?,?)",
-                (name, data.get("contact", ""), data.get("goal", ""), "intake", now_iso(), now_iso()),
+                (name, data.get("contact", ""), data.get("goal", ""), "intake", timestamp, timestamp),
             )
             session_id = cur.lastrowid
         return self.json({"id": session_id})
+
+    def update_session_profile(self, session_id):
+        data = self.read_json()
+        name = (data.get("client_name") or "").strip()
+        if not name:
+            return self.json({"error": "用户姓名不能为空。"}, 400)
+        timestamp = now_iso()
+        with db() as conn:
+            cur = conn.execute(
+                """
+                UPDATE sessions
+                SET client_name=?, contact=?, goal=?, updated_at=?
+                WHERE id=? AND deleted_at IS NULL
+                """,
+                (name, data.get("contact", ""), data.get("goal", ""), timestamp, session_id),
+            )
+            if cur.rowcount == 0:
+                return self.json({"error": "档案不存在或已经删除。"}, 404)
+        return self.json({"ok": True, "id": session_id, "updated_at": timestamp})
 
     def list_sessions(self):
         with db() as conn:
