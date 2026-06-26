@@ -9,8 +9,9 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>能力资产诊断 · AI 前置采集</title>
-    <link rel="stylesheet" href="/static/styles.css?v=20260626liangyan" />
-    <link rel="stylesheet" href="styles.css?v=20260626liangyan" />
+    <link rel="icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACw=" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260626workspace" />
+    <link rel="stylesheet" href="styles.css?v=20260626workspace" />
   </head>
   <body>
     <div class="admin-gate" id="adminGate" hidden>
@@ -43,7 +44,7 @@
     <main class="workspace">
       <section class="topbar">
         <div>
-          <p class="eyebrow">第一步 · 上传材料</p>
+          <p class="eyebrow" id="workspaceEyebrow">顾问工作台</p>
           <h2 id="pageTitle">能力资产与认知资产诊断</h2>
         </div>
         <div class="top-actions">
@@ -57,23 +58,61 @@
         </div>
       </section>
 
-      <section class="deliverable-strip" id="boundDeliverableStrip" aria-label="用户交付物" hidden>
-        <div>
-          <p class="eyebrow" id="boundDeliverableEyebrow">用户 · 第一步交付物</p>
-          <h3 id="boundDeliverableTitle">阶段结果入口</h3>
-        </div>
-        <div class="deliverable-links" id="boundDeliverableLinks"></div>
-      </section>
-
-      <section class="deliverable-submissions" id="zhangluSubmissionPanel" aria-label="张麓提交结果" hidden>
-        <div class="deliverable-submissions-head">
-          <div>
-            <p class="eyebrow">张麓 · 用户提交</p>
-            <h3>商业方向偏好与约束结果</h3>
+      <section class="case-overview">
+        <div class="workflow-card">
+          <div class="workflow-head">
+            <div>
+              <p class="eyebrow">服务流程</p>
+              <h3>第一阶段：能力资产诊断</h3>
+            </div>
+            <span id="workflowHint">先创建或选择一个档案。</span>
           </div>
-          <button id="refreshDeliverableSubmissionsBtn" type="button">刷新提交结果</button>
+          <div class="workflow-steps" id="workflowSteps">
+            <div class="workflow-step" id="stageUpload">
+              <strong>1. 上传材料</strong>
+              <span>档案信息、文件、链接、补充文本</span>
+            </div>
+            <div class="workflow-step" id="stageOrganize">
+              <strong>2. 材料整理</strong>
+              <span>规整事实底稿，分析材料缺口</span>
+            </div>
+            <div class="workflow-step" id="stageInterview">
+              <strong>3. 会前访谈</strong>
+              <span>用户与 AI 追问补证据</span>
+            </div>
+            <div class="workflow-step" id="stageDeliver">
+              <strong>4. 阶段材料</strong>
+              <span>材料线索、会前准备、交付物</span>
+            </div>
+          </div>
         </div>
-        <div id="deliverableSubmissionsList" class="deliverable-submissions-list">正在检查提交结果...</div>
+
+        <div class="case-assets">
+          <section class="asset-empty" id="boundDeliverableEmpty">
+            <p class="eyebrow">阶段交付物</p>
+            <h3>当前档案暂无独立结果页</h3>
+            <span>完成材料整理和会前访谈后，可在下方“阶段材料”查看工作底稿。</span>
+          </section>
+
+          <section class="deliverable-strip" id="boundDeliverableStrip" aria-label="用户交付物" hidden>
+            <div>
+              <p class="eyebrow" id="boundDeliverableEyebrow">用户 · 第一步交付物</p>
+              <h3 id="boundDeliverableTitle">阶段结果入口</h3>
+            </div>
+            <div class="deliverable-links" id="boundDeliverableLinks"></div>
+          </section>
+
+          <section class="deliverable-submissions" id="zhangluSubmissionPanel" aria-label="用户提交结果" hidden>
+            <div class="deliverable-submissions-head">
+              <div>
+                <p class="eyebrow">用户提交</p>
+                <h3>商业方向偏好与约束结果</h3>
+              </div>
+              <button id="refreshDeliverableSubmissionsBtn" type="button">刷新</button>
+            </div>
+            <div id="deliverableSubmissionsList" class="deliverable-submissions-list">正在检查提交结果...</div>
+          </section>
+        </div>
       </section>
 
       <section class="grid">
@@ -154,7 +193,7 @@
 
         <div class="panel chat-panel">
           <div class="panel-head">
-            <h3>2. 整理与追问</h3>
+            <h3>2. 材料整理</h3>
           </div>
           <div class="method-strip">
             <span>BEI/STAR</span>
@@ -272,6 +311,13 @@
             </div>
             <div class="decision-advisor" id="decisionAdvisor"></div>
           </div>
+          <div class="process-subhead">
+            <div>
+              <p class="eyebrow">第三步</p>
+              <h4>会前访谈追问</h4>
+            </div>
+            <span>用户自助页面的聊天记录会同步到这里。</span>
+          </div>
           <div class="chat" id="chat"></div>
           <form id="messageForm" class="reply">
             <textarea name="content" rows="4" placeholder="回答 AI 的追问，尽量讲具体事件、动作、结果和判断依据"></textarea>
@@ -283,7 +329,7 @@
       <section class="panel report-panel">
         <div class="panel-head">
           <div>
-            <h3>3. 顾问准备材料</h3>
+            <h3>4. 阶段材料</h3>
             <span>按标签切换材料线索与会前准备</span>
           </div>
           <button id="downloadMarkdownBtn" type="button" class="secondary">下载 Markdown</button>
@@ -299,11 +345,11 @@
       <p id="busyText">处理中...</p>
     </dialog>
 
-    <script src="/static/app.js?v=20260626liangyan"></script>
+    <script src="/static/app.js?v=20260626workspace"></script>
     <script>
       if (!window.__abilityIntakeLoaded) {
         const script = document.createElement("script");
-        script.src = "app.js?v=20260626liangyan";
+        script.src = "app.js?v=20260626workspace";
         document.body.appendChild(script);
       }
     </script>

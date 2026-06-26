@@ -383,8 +383,10 @@ function renderSession() {
   if (!currentSession) return;
   const s = currentSession.session;
   el("pageTitle").textContent = `${s.client_name} · 能力资产与认知资产诊断`;
+  el("workspaceEyebrow").textContent = "顾问工作台 · 当前档案";
   el("sessionStatus").textContent = s.status;
   renderSessionForm();
+  renderWorkflow();
   const downloadButton = el("downloadMarkdownBtn");
   if (downloadButton) downloadButton.disabled = false;
   renderClientLink(s.id);
@@ -395,6 +397,45 @@ function renderSession() {
   renderMaterialDecision();
   renderBoundDeliverables();
   renderNextStep();
+}
+
+function renderWorkflow() {
+  const stages = ["stageUpload", "stageOrganize", "stageInterview", "stageDeliver"];
+  stages.forEach((id) => {
+    const node = el(id);
+    if (!node) return;
+    node.classList.remove("active", "done", "locked");
+  });
+
+  const hint = el("workflowHint");
+  if (!currentSession) {
+    stages.forEach((id, index) => el(id)?.classList.add(index === 0 ? "active" : "locked"));
+    if (hint) hint.textContent = "先创建或选择一个档案。";
+    return;
+  }
+
+  const files = currentSession.files || [];
+  const materialOrg = getFreshMaterialOrganizationReport();
+  const briefReport = getLatestReport("client_pre_session_brief");
+  const hasMessages = (currentSession.conversation || []).length > 0;
+  const uploadDone = files.length > 0;
+  const organizeDone = Boolean(materialOrg);
+  const interviewDone = Boolean(briefReport) || currentSession.session.status === "client_brief_ready";
+
+  el("stageUpload")?.classList.add(uploadDone ? "done" : "active");
+  el("stageOrganize")?.classList.add(organizeDone ? "done" : uploadDone ? "active" : "locked");
+  el("stageInterview")?.classList.add(interviewDone ? "done" : organizeDone || hasMessages ? "active" : "locked");
+  el("stageDeliver")?.classList.add(interviewDone ? "active" : "locked");
+
+  if (!uploadDone) {
+    if (hint) hint.textContent = "当前重点：先完成用户档案和材料上传。";
+  } else if (!organizeDone) {
+    if (hint) hint.textContent = `已保存 ${files.length} 份材料，下一步做材料规整与材料分析。`;
+  } else if (!interviewDone) {
+    if (hint) hint.textContent = hasMessages ? "用户正在会前访谈中，等待会前整理生成。" : "材料已整理，可以把用户访谈链接发给用户。";
+  } else if (hint) {
+    hint.textContent = "会前整理已生成，可以进入真人共创校准。";
+  }
 }
 
 function renderSessionForm() {
@@ -436,8 +477,10 @@ async function renderBoundDeliverables() {
   const deliverable = currentBoundDeliverable();
   const strip = el("boundDeliverableStrip");
   const links = el("boundDeliverableLinks");
+  const empty = el("boundDeliverableEmpty");
   const panel = el("zhangluSubmissionPanel");
   if (strip) strip.hidden = !deliverable;
+  if (empty) empty.hidden = Boolean(deliverable);
   if (links) links.innerHTML = "";
   if (panel) panel.hidden = !shouldShowZhangluDeliverables();
   if (!deliverable) {
@@ -1274,8 +1317,10 @@ function clearCurrent() {
   currentSessionId = null;
   currentSession = null;
   el("pageTitle").textContent = "能力资产与认知资产诊断";
+  el("workspaceEyebrow").textContent = "顾问工作台";
   el("sessionStatus").textContent = "未开始";
   renderSessionForm();
+  renderWorkflow();
   el("fileList").innerHTML = "";
   el("savedCount").textContent = "0 份";
   el("clientLink").value = "";
@@ -1288,6 +1333,7 @@ function clearCurrent() {
   }
   el("report").className = "report empty";
   el("report").textContent = "还没有生成材料整理包或审阅材料。请先完成第一步上传材料，再点击“整理材料”。";
+  el("boundDeliverableEmpty").hidden = false;
   el("boundDeliverableStrip").hidden = true;
   el("boundDeliverableLinks").innerHTML = "";
   el("zhangluSubmissionPanel").hidden = true;
