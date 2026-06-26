@@ -17,29 +17,51 @@ const MANUAL_TASK_HINTS = {
 };
 
 const ZHANGLU_DELIVERABLE_ID = "zhanglu-business-preference-constraints";
+const STANDARD_DELIVERABLE_SLOTS = [
+  {
+    key: "complete",
+    label: "能力校准工作台完整版本",
+    description: "保留完整证据链、判断过程和会谈校准材料。",
+  },
+  {
+    key: "markdown",
+    label: "下载完整版本 Markdown",
+    description: "用于归档、二次编辑和交付物版本管理。",
+  },
+  {
+    key: "visual",
+    label: "可视化版本",
+    description: "适合会中共创和用户阅读的视觉化工作台。",
+  },
+  {
+    key: "preference",
+    label: "商业方向偏好与约束表",
+    description: "进入第二步商业方向判断前，收集用户偏好、边界和风险承受度。",
+  },
+];
+const BUSINESS_PREFERENCE_LINK = "/static/deliverables/zhanglu-business-preference-constraints.html";
 const BOUND_DELIVERABLES = [
   {
     matchName: "张麓",
     eyebrow: "张麓 · 第一步交付物",
-    title: "阶段结果入口",
-    links: [
-      { label: "交付物共创校准工作台", href: "/static/deliverables/zhanglu-co-creation-workbench.html", target: "_blank" },
-      { label: "下载共创校准 Markdown", href: "/static/deliverables/zhanglu-co-creation-materials.md", download: true },
-      { label: "能力资产诊断最终交付", href: "/static/deliverables/zhanglu-ability-assets-final-workbench.html", target: "_blank" },
-      { label: "商业方向偏好与约束表", href: "/static/deliverables/zhanglu-business-preference-constraints.html", target: "_blank" },
-    ],
+    title: "第一环节标准交付物",
+    slots: {
+      complete: { href: "/static/deliverables/zhanglu-co-creation-workbench.html", target: "_blank" },
+      markdown: { href: "/static/deliverables/zhanglu-co-creation-materials.md", download: true },
+      visual: { href: "/static/deliverables/zhanglu-ability-assets-final-workbench.html", target: "_blank" },
+      preference: { href: BUSINESS_PREFERENCE_LINK, target: "_blank" },
+    },
   },
   {
     matchName: "梁焱",
     eyebrow: "梁焱 · 第一步交付物",
-    title: "能力资产假设校准完整证据版",
-    links: [
-      {
-        label: "第一步能力资产假设校准完整证据版",
-        href: "/static/deliverables/liangyan-ability-asset-hypothesis-evidence-workbench.html",
-        target: "_blank",
-      },
-    ],
+    title: "第一环节标准交付物",
+    slots: {
+      complete: { href: "/static/deliverables/liangyan-ability-asset-hypothesis-evidence-workbench.html", target: "_blank" },
+      markdown: { href: "/static/deliverables/梁焱-第一步能力资产假设校准材料.md", download: true },
+      visual: { href: "/static/deliverables/梁焱-第一步能力资产假设校准工作台.html", target: "_blank" },
+      preference: { href: BUSINESS_PREFERENCE_LINK, target: "_blank" },
+    },
   },
 ];
 
@@ -470,7 +492,17 @@ function shouldShowZhangluDeliverables() {
 
 function currentBoundDeliverable() {
   const name = (currentSession?.session?.client_name || "").replace(/\s/g, "");
-  return BOUND_DELIVERABLES.find((item) => name.includes(item.matchName));
+  const matched = BOUND_DELIVERABLES.find((item) => name.includes(item.matchName));
+  if (matched) return matched;
+  const displayName = currentSession?.session?.client_name || "当前用户";
+  return {
+    matchName: "",
+    eyebrow: `${displayName} · 第一步交付物`,
+    title: "第一环节标准交付物",
+    slots: {
+      preference: { href: BUSINESS_PREFERENCE_LINK, target: "_blank" },
+    },
+  };
 }
 
 async function renderBoundDeliverables() {
@@ -491,10 +523,25 @@ async function renderBoundDeliverables() {
   el("boundDeliverableEyebrow").textContent = deliverable.eyebrow;
   el("boundDeliverableTitle").textContent = deliverable.title;
   if (links) {
-    links.innerHTML = deliverable.links.map((link) => {
+    links.innerHTML = STANDARD_DELIVERABLE_SLOTS.map((slot) => {
+      const link = deliverable.slots?.[slot.key];
+      if (!link?.href) {
+        return `
+          <div class="deliverable-link pending">
+            <strong>${escapeHtml(slot.label)}</strong>
+            <span>${escapeHtml(slot.description)}</span>
+            <em>待生成</em>
+          </div>
+        `;
+      }
       const target = link.target ? ` target="${link.target}" rel="noopener"` : "";
       const download = link.download ? " download" : "";
-      return `<a href="${escapeHtml(link.href)}"${target}${download}>${escapeHtml(link.label)}</a>`;
+      return `
+        <a class="deliverable-link" href="${escapeHtml(link.href)}"${target}${download}>
+          <strong>${escapeHtml(slot.label)}</strong>
+          <span>${escapeHtml(slot.description)}</span>
+        </a>
+      `;
     }).join("");
   }
   if (shouldShowZhangluDeliverables()) {

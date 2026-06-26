@@ -563,29 +563,57 @@ button:disabled {
 }
 
 .deliverable-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.deliverable-links a {
-  min-height: 38px;
-  padding: 9px 12px;
-  display: inline-flex;
-  align-items: center;
+.deliverable-link {
+  min-height: 94px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--ink);
   font-size: 13px;
-  font-weight: 700;
   text-decoration: none;
 }
 
-.deliverable-links a:hover {
+.deliverable-link strong,
+.deliverable-link span,
+.deliverable-link em {
+  display: block;
+}
+
+.deliverable-link strong {
+  font-size: 14px;
+}
+
+.deliverable-link span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deliverable-link em {
+  align-self: end;
+  color: var(--yellow);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.deliverable-link:hover {
   border-color: rgba(47, 143, 91, 0.42);
   color: var(--green);
+}
+
+.deliverable-link.pending {
+  border-style: dashed;
+  cursor: default;
+  opacity: 0.74;
 }
 
 .deliverable-submissions {
@@ -1728,6 +1756,10 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 
+  .deliverable-links {
+    grid-template-columns: 1fr;
+  }
+
   .client-shell {
     width: min(100% - 20px, 760px);
     padding: 18px 0 28px;
@@ -1996,16 +2028,22 @@ label,
   border-radius: 6px;
 }
 
-.deliverable-links a {
+.deliverable-link {
   background: rgba(255, 255, 255, 0.045);
   border-color: var(--line);
   color: var(--ink);
 }
 
-.deliverable-links a:hover {
+.deliverable-link:hover {
   border-color: rgba(88, 225, 193, 0.42);
   background: rgba(88, 225, 193, 0.1);
   color: var(--green);
+}
+
+.deliverable-link.pending:hover {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--ink);
 }
 
 .deliverable-submissions {
