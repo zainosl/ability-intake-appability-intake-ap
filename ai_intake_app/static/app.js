@@ -17,6 +17,7 @@ const MANUAL_TASK_HINTS = {
 };
 
 const ZHANGLU_DELIVERABLE_ID = "zhanglu-business-preference-constraints";
+const ZHANGLU_PREFERENCE_RESULT_LINK = "/static/deliverables/zhanglu-business-preference-result.html";
 const STANDARD_DELIVERABLE_SLOTS = [
   {
     key: "complete",
@@ -362,8 +363,9 @@ async function loadDeliverableSubmissions() {
       <article class="deliverable-submission-card">
         <strong>${escapeHtml(item.client_name || "未命名用户")} · ${escapeHtml(item.title || "商业方向偏好与约束表")}</strong>
         <span>最新提交 · ${formatDate(item.created_at)} · 提交 ID ${item.id}</span>
-        ${renderCommercialPreferencePreview(item.markdown)}
+        ${renderCommercialPreferenceSubmissionSummary(item)}
         <div class="deliverable-submission-actions">
+          <a class="button-link" href="${ZHANGLU_PREFERENCE_RESULT_LINK}" target="_blank" rel="noopener">查看可视化结果</a>
           <button type="button" data-copy-submission="${item.id}">复制完整 Markdown</button>
         </div>
       </article>
@@ -444,6 +446,31 @@ function renderCommercialPreferencePreview(markdown) {
           </section>
         `).join("")}
       </div>
+    </div>
+  `;
+}
+
+function renderCommercialPreferenceSubmissionSummary(item) {
+  const items = parseCommercialPreferenceMarkdown(item.markdown);
+  if (!items) {
+    return `<pre>${escapeHtml(markdownPreview(item.markdown))}</pre>`;
+  }
+  const filled = items.filter((entry) => entry.preference !== "未填写" || entry.constraint !== "未填写").length;
+  const signals = items
+    .filter((entry) => entry.preference !== "未填写")
+    .slice(0, 3)
+    .map((entry) => `<li><b>${escapeHtml(entry.title)}</b><span>${escapeHtml(compactCommercialText(entry.preference, 90))}</span></li>`)
+    .join("");
+  return `
+    <div class="deliverable-submission-summary">
+      <div>
+        <p class="eyebrow">提交摘要</p>
+        <strong>${filled}/${items.length} 类已填写</strong>
+        <span>完整偏好/约束矩阵已移到独立结果页，避免工作台拥挤。</span>
+      </div>
+      <ul>
+        ${signals || "<li><span>还没有可展示的偏好信号。</span></li>"}
+      </ul>
     </div>
   `;
 }

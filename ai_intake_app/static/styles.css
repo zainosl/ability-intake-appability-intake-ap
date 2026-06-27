@@ -774,6 +774,74 @@ button:disabled {
   margin-top: 12px;
 }
 
+.button-link {
+  min-height: 38px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(88, 225, 193, 0.35);
+  border-radius: 6px;
+  background: rgba(88, 225, 193, 0.1);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.deliverable-submission-summary {
+  margin-top: 12px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(6, 8, 10, 0.34);
+}
+
+.deliverable-submission-summary p,
+.deliverable-submission-summary ul {
+  margin: 0;
+}
+
+.deliverable-submission-summary strong,
+.deliverable-submission-summary span {
+  display: block;
+}
+
+.deliverable-submission-summary strong {
+  margin-top: 5px;
+  color: var(--green);
+  font-size: 20px;
+}
+
+.deliverable-submission-summary span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.deliverable-submission-summary ul {
+  display: grid;
+  gap: 7px;
+  padding: 0;
+}
+
+.deliverable-submission-summary li {
+  list-style: none;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.deliverable-submission-summary li b {
+  display: block;
+  color: var(--green);
+  font-size: 12px;
+}
+
 .topbar h2 {
   margin: 3px 0 0;
   font-size: 28px;
